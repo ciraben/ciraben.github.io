@@ -1,8 +1,8 @@
 ---
 layout: page
 title: contact
-description: This is the page description.
-background: '/PATH_TO_IMAGE'
+description: 
+background: '/images/dandelion.jpg'
 ---
 <form name="sentMessage" id="contactForm" novalidate>
   <div class="control-group">
