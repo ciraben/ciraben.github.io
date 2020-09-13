@@ -28,8 +28,8 @@ So, this blog is a bit of a cheatsheet on the things I've learned. If it helps s
 
 ___
 
-These days, you might find me poking around #hardfought on IRC, trying to rack up a new [Nethack score](https://nethackscoreboard.org/players/T/Tommo.all.html).
+These days, you might find me hanging around #hardfought on IRC, trying to rack up a new [Nethack score](https://nethackscoreboard.org/players/T/Tommo.all.html).
 
-You can also find me on [Github](https://github.com/ciraben), or reach me at tom.on.github@gmail.com.
+You can also find me on [Github](https://github.com/ciraben), or reach me at [tom.on.github@gmail.com](mailto:tom.on.github@gmail.com).
 
 Oh, and that's me, I'm Tom - welcome!
