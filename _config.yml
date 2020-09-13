@@ -34,6 +34,17 @@ theme: jekyll-theme-clean-blog
 #   skin: dark
 plugins:
   - jekyll-feed
+# attempt to paginate posts
+gems:
+  - jekyll-paginate-v2
+pagination:
+  enabled: true
+  per_page: 3
+  permalink: '/posts/page/:num/'
+  title: 'posts - page :num'
+  limit: 0
+  sort_field: 'date'
+  sort_reverse: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.
