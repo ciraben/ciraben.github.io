@@ -151,7 +151,7 @@ The [theme](https://github.com/StartBootstrap/startbootstrap-clean-blog-jekyll) 
 </form>
 ```
 
-<img src="/images/contact1.png" class="w-100">
+<img src="/images/2020-09-19-bloghosting_odds_and_ends/contact1.png" class="w-100">
 
 It looks nice but isn't functional out of the box. For that, we want Formspree.
 
@@ -188,7 +188,7 @@ Formspree offers this barebones contact form template (and [others](https://form
 </form>
 ```
 
-<img src="/images/contact2.png" class="mw-100">
+<img src="/images/2020-09-19-bloghosting_odds_and_ends/contact2.png" class="mw-100">
 
 It looks pretty bland, but includes everything essential to function with Formspree.
 
