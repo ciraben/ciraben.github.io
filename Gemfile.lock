@@ -70,6 +70,7 @@ DEPENDENCIES
   jekyll-feed (~> 0.12)
   jekyll-paginate-v2 (~> 1.1)
   jekyll-theme-clean-blog
+  rouge (~> 3.22)
 
 BUNDLED WITH
    2.1.4

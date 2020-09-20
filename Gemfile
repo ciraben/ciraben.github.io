@@ -21,3 +21,5 @@ group :jekyll_plugins do
 end
 
 
+
+gem "rouge", "~> 3.22"
