@@ -22,20 +22,15 @@ title: ciraben
 github_username: ciraben
 email: tom.on.github@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
-  just a hobbyist with heart. 
+  just a hobbyist with heart 
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-# twitter_username: jekyllrb
-github_username:  ciraben
 
 # Build settings
-# theme: minima
 theme: jekyll-theme-clean-blog
-# minima:
-#   skin: dark
 plugins:
   - jekyll-feed
-# attempt to paginate posts
+# paginate posts
 gems:
   - jekyll-paginate-v2
 pagination:
@@ -46,7 +41,7 @@ pagination:
   limit: 0
   sort_field: 'date'
   sort_reverse: true
-
+# syntax highlighting
 highlighter: rouge
 
 # Exclude from processing.

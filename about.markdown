@@ -19,8 +19,8 @@ Near the end of my program, I started auditing gender theory classes too. I bega
 Summer 2014, I became enamoured with text-based games. 
 I taught myself enough Python to make a couple of my own, then switched gears & developed an `.xml` GUI template for the expansive [Discworld MUD](http://discworld.starturtle.net/lpc/).
 
-In 2015, I moved on to speedrunning, and put my childhood Pokemon skills to the test [glitching](http://wiki.pokemonspeedruns.com/index.php/Pok%C3%A9mon_Red/Blue/Yellow_DSum_Manipulation) my way through the original games.
-Although it was a short phase, it piqued my interest in retro backend and in 2016, I began poking around my laptop in command line to see what I could find.
+In 2015, I moved on to speedrunning, and put my childhood Pokémon skills to the test [glitching](http://wiki.pokemonspeedruns.com/index.php/Pok%C3%A9mon_Red/Blue/Yellow_DSum_Manipulation) my way through the original games.
+Although it was a short phase, it piqued my interest in "retro backend" and in 2016, I began poking around my laptop in command line to see what I could find.
 
 Turns out, a lot.
 

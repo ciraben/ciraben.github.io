@@ -2,8 +2,15 @@
 layout: page
 title: contact
 description: 
-background: '/images/dandelion.jpg'
+background: '/images/snowdrops.jpg'
 ---
+
+<p>
+Questions? Comments? Limited-time offers?
+<br>
+<br>
+Forget your email client, just shoot me a quick one right here!
+</p>
 
   <div class="container">
     <div class="row">
@@ -30,7 +37,7 @@ background: '/images/dandelion.jpg'
   <div class="control-group">
     <div class="form-group floating-label-form-group controls">
       <label>Message</label>
-    <textarea name="message" class="form-control" placeholder="Message" required data-validation-required-message="Please enter a message."></textarea>
+    <textarea name="message" class="form-control" placeholder="Message" required data-validation-required-message="Please enter a message." rows=5></textarea>
       <p class="help-block text-danger"></p>
     </div>
   </div>
