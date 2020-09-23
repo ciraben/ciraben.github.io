@@ -1,0 +1,132 @@
+---
+layout: page
+title: projects 
+background: '/images/car.jpg'
+---
+
+<div class="text-center">
+  <h1>ongoing</h1>
+</div>
+<hr>
+
+{% for project in site.newprojects %}
+
+<div class="card rounded-0 border-left-0 border-right-0 hoverable">
+  <a class="text-decoration-none" href="{{ project.url | prepend: site.baseurl | replace: '//', '/' }}">
+  <!-- {% if project.project-link %} -->
+  <!-- <a class="text-decoration-none" href="{{ project.project-link }}"> -->
+  <!-- {% else %} -->
+  <!-- <a class="text-decoration-none"> -->
+  <!-- {% endif %} -->
+    <div class="container rounded">
+      <!--medium styles-->
+      <div class="d-none d-md-block">
+        <div class="row">
+          <div class="col-3 col-sm-5 pl-3 py-3">
+            <img class="card-img rounded" src={{ project.background | relative_url }}>
+          </div>
+          <div class="col-9 col-sm-7">
+            <div class="card-body">
+              <h4 class="card-title">{{ project.title }}</h4>
+              {% if project.subtitle %}
+              <p class="card-text">{{ project.subtitle }}</p>
+              {% else %}
+              <p class="card-text">{{ project.excerpt | strip_html | truncatewords: 20 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--mini styles-->
+      <div class="d-md-none mx-n2 my-2 rounded"
+        style="background-image: url({{ project.background | relative_url }});
+        background-repeat: no-repeat;
+        background-size: cover;
+        ">
+        <div class="rounded" style="background: linear-gradient(140deg, rgba(220, 225, 225,1), 75%, rgba(255,255,255,0));
+          backdrop-filter: blur(1px);">
+          <div class="card-body">
+            <h4 class="card-title">{{ project.title }}</h4>
+              <div class="row">
+                <div class="col-10 col-sm-8">
+                {% if project.subtitle %}
+                <p class="card-text">{{ project.subtitle }}</p>
+                {% else %}
+                <p class="card-text">{{ project.excerpt | strip_html | truncatewords: 20 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+<br>
+
+<hr>
+
+{% endfor %}
+
+<div class="text-center">
+  <h1>completed</h1>
+</div>
+<hr>
+
+{% for project in site.oldprojects %}
+
+<div class="card rounded-0 border-left-0 border-right-0 hoverable">
+  <a class="text-decoration-none" href="{{ project.url | prepend: site.baseurl | replace: '//', '/' }}">
+  <!-- {% if project.project-link %} -->
+  <!-- <a class="text-decoration-none" href="{{ project.project-link }}"> -->
+  <!-- {% else %} -->
+  <!-- <div class="text-decoration-none"> -->
+  <!-- {% endif %} -->
+    <div class="container rounded">
+      <!--medium styles-->
+      <div class="d-none d-md-block">
+        <div class="row">
+          <div class="col-3 col-sm-5 pl-3 py-3">
+            <img class="card-img rounded" src={{ project.background | relative_url }}>
+          </div>
+          <div class="col-9 col-sm-7">
+            <div class="card-body">
+              <h4 class="card-title">{{ project.title }}</h4>
+              {% if project.subtitle %}
+              <p class="card-text">{{ project.subtitle }}</p>
+              {% else %}
+              <p class="card-text">{{ project.excerpt | strip_html | truncatewords: 20 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--mini styles-->
+      <div class="d-md-none mx-n2 my-2 rounded"
+        style="background-image: url({{ project.background | relative_url }});
+        background-repeat: no-repeat;
+        background-size: cover;
+        ">
+        <div class="rounded" style="background: linear-gradient(140deg, rgba(220, 225, 225,1), 75%, rgba(255,255,255,0));
+          backdrop-filter: blur(1px);">
+          <div class="card-body">
+            <h4 class="card-title">{{ project.title }}</h4>
+              <div class="row">
+                <div class="col-10 col-sm-8">
+                {% if project.subtitle %}
+                <p class="card-text">{{ project.subtitle }}</p>
+                {% else %}
+                <p class="card-text">{{ project.excerpt | strip_html | truncatewords: 20 }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<hr>
+
+{% endfor %}
