@@ -59,7 +59,7 @@ We can see we're now on the `new-feature` branch - any commits will be recorded 
 ```bash
 $ git branch
   main
-* newpost
+* new-feature
 ```
 
 After making some commits and successfully testing our new feature, we can add it to our `main` project.
@@ -159,7 +159,7 @@ To display your version as a release:
 5. Optionally enter a title & description for this version.
 6. Scroll down & click "Publish release", and voilà!
 
-Your new version will be displayed on your repository's main page in the righthand panel under Releases, and at the bottom of the main page, after the README. Github auto-generates `.zip`/`.tar.gz` distributions of each release version, downloadable from the releases page.
+Your new version will be displayed on your repository's main page in the righthand panel under Releases, or at the bottom of the main page, after the README. Github auto-generates `.zip`/`.tar.gz` distributions of each release version, downloadable from the releases page.
 
 ### Getting Around in Git
 
@@ -177,7 +177,7 @@ v0.1.1
   ```bash
   $ git branch -avv
     main                    c2f592e [origin/main] Minor adjustments.
-  * newpost                 c2f592e Minor adjustments.
+  * new-feature             c2f592e Minor adjustments.
     remote                  c2f592e Minor adjustments.
     remotes/origin/gh-pages 8003501 jekyll build from Action c2f592e...
   ```
@@ -216,10 +216,10 @@ v0.1.1-2-g237406c
     (use "git restore <file>..." to discard changes in working directory)
           modified:   README.md
   ```
-* `git diff HEAD` shows line-by-line details of those changes.
+* `git diff` shows line-by-line details of those changes.
 
   ```bash
-  $ git diff HEAD
+  $ git diff
   diff --git a/README.md b/README.md
   index 190ea13..a75d153 100644
   --- a/README.md
@@ -242,29 +242,38 @@ v0.1.1-2-g237406c
 ### Odds and ends
 
 To edit the most recent commit message before pushing:
+
 ```bash
 $ git commit --amend
 ```
-(This adds current changes to the commit, however.)
+
+However, this adds our unstaged changes to the commit as well.
+More generally, we can "tidy up" small local commits (typos, etc.) by refactoring them before pushing. To rewind the last N commits,
+
+```bash
+$ git reset --soft HEAD~N
+```
+
+After soft resetting, our commit messages are deleted but all our changes remain, unstaged. From here, we can recommit them all at once,
+
+```bash
+$ git commit -a
+```
+
+or we can add files manually and re-commit them in whatever grouping makes sense to us.
+
+```bash
+$ git add FILE1
+$ git commit -m "FILE-SPECIFIC MESSAGE"
+$ git add FILE2 FILE3
+$ git commit -m "ANOTHER MESSAGE"
+```
 
 To move a tag to the most recent commit:
 ```bash
 $ git push origin :refs/tags/TAGNAME
 $ git tag --force -a TAGNAME
 $ git push origin main --tags
-```
-
-We can always add our changes one file at a time and document each with a separate commit (instead of using `git add .` or `git commit -a`).
-```bash
-$ git add FILE
-$ git commit -m "FILE-SPECIFIC MESSAGE"
-```
-
-We can "tidy up" small local commits (typos, etc.) by combining them before pushing. To gather the last N commits into one commit,
-
-```bash
-$ git reset --soft HEAD~N
-$ git commit -a
 ```
 
 One last tidbit — please be careful with this one! Unlike other Git commands, `reset --hard` deletes changes for good. However, if we've made a mess of our project files and just want to start fresh, we can.
