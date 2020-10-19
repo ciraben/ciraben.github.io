@@ -1,6 +1,8 @@
 ---
 layout: project
 title: Belafonte for Vim
+date:   2020-07-23 00:00:00 -0700
+complete: false
 background: "/images/belafonte-colorscheme-square.png"
 project-link:
 ---

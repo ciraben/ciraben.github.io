@@ -1,6 +1,8 @@
 ---
 layout: project
 title: WebHack
+date:   2020-10-05 00:00:00 -0700
+complete: true
 background: '/images/WebHack/almost-there-square.png'
 project-link: "https://ciraben.github.io/webhack"
 ---

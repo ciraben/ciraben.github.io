@@ -2,6 +2,7 @@
 layout: project
 title: Hot Photography 
 date:   2020-10-16 00:00:00 -0700
+complete: true
 background: '/images/cathedral.jpg'
 project-link: "https://ciraben.myshopify.com/"
 ---
