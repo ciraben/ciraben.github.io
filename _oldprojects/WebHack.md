@@ -13,6 +13,8 @@ Altogether, I worked about 45 hours over the course of the three days. This incl
 
 So, did I succeed in rectifying that game-void in my youth? Haha, probably not quite, at this point. But I did manage to pull together a complete, functional first draft all by myself, and that's a pretty cool feat!
 
+You can [play WebHack](https://ciraben.github.io/webhack/) or check out the [source code](https://github.com/ciraben/webhack).
+
 <div class="container border rounded py-3">
   <div class="row">
     <div class="col-md-6">
