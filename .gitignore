@@ -12,6 +12,7 @@ bundle
 *.swp
 
 # Other
+.DS_Store
 TODO
 contact_old.md
 darkmode.scss
