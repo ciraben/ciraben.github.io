@@ -18,9 +18,7 @@ My goal here was to showcase my Shopify skills, and I also took the opportunity 
 
 Both additions are integrated with the Shopify customization menu, so that a client could update their site easily without touching any code.
 
-
-I was able to create this project thanks to Shopify's 14-day free trial. If you're  lucky enough to exist within that time-frame, you can see Hot Photography in action [here](https://ciraben.myshopify.com/) with the password `lantern`. 
-Otherwise, I've included plenty of screenshots (and I'll look into hosting the resulting site elsewhere as well).
+I was able to create this project thanks to Shopify's 14-day free trial. Since its expiry, I've transferred Hot Photography to a Shopify Developer account. You can see Hot Photography in action [here](https://hotphotography.myshopify.com/) with the password `lantern`. 
 
 <div class="container border rounded py-3">
   <div class="row">
