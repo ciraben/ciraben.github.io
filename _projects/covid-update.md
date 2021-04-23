@@ -3,7 +3,7 @@ layout: project
 title: covid-update
 date:   2020-09-01 00:00:00 -0700
 complete: true
-background:
+background: '/images/covidhist.png'
 project-link: "https://github.com/ciraben/covid-update"
 ---
 
