@@ -23,3 +23,7 @@ end
 
 
 gem "rouge", "~> 3.22"
+
+gem "webrick", "~> 1.8"
+
+gem "execjs", "~> 2.8"
