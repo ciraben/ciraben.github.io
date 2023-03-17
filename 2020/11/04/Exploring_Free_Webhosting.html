@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    Exploring Free Webhosting - ciraben
+    
+  </title>
+
+  <meta name="description" content="I’ve started to get a decent grasp of front-end web development and some of the popular tools that are available to facilitate the process. However, my exper...">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/vendor/fontawesome-free/css/all.min.css">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/2020/11/04/Exploring_Free_Webhosting.html">
+  <link rel="alternate" type="application/rss+xml" title="ciraben" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">ciraben</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/projects">Portfolio</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+<header class="masthead" style="background-image: url('/images/pumpkin.jpg')">
+  
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Exploring Free Webhosting</h1>
+            
+            <span class="meta">Posted 
+              <a href="#">
+                
+              </a>
+              on November 04, 2020 &middot; <span class="reading-time" title="Estimated read time">
+  
+   12 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p>I’ve started to get a decent grasp of front-end web development and some of the popular tools that are available to facilitate the process. 
+However, my experience up until this point has been limited to Github Pages. I’m curious about that other, server-side piece.</p>
+
+<p>Recently, I’ve taken on a project I’d like to host outside of Github. A new experience! We’re going to take a look at that process here.
+My project is a static business landing page with some javascript elements, so it feels like it will be a good test-case. To build the site, I used <a href="/jekyll/update/2020/09/07/playing_with_gems.html">the toolkit I wrote about here</a>, including Jekyll, Bootstrap and Sass. I’ve tested it out locally &amp; I’m satisfied with how it looks, so let’s look at publishing it online.</p>
+
+<p>From <a href="">this list of free webhosting services</a>, I chose to work with <a href="https://infinityfree.net">infinityfree.net</a> due to its fast advertised load times &amp; forever-free service.</p>
+
+<h2 id="file-transfer-with-ftp">File Transfer with FTP</h2>
+
+<p>Logging into our brand new InfinityFree account, we’re met with a plethora of admin tabs and configuration options – definitely a little overwhelming at first.
+First, we create a new hosting account under the Accounts tab and select Manage, which takes us to our site dashboard.
+From here, our next step is to figure out how to upload our file tree. InfinityFree recommends <a href="https://support.infinityfree.net/files/how-to-upload-files-with-ftp/">uploading files with FTP</a>, which is a relatively new concept for me.</p>
+
+<p>On the other hand, FTP (File Transfer Protocol) is an <em>old</em> concept in the history of the internet. In fact, first developed for ARPANET, FTP <a href="https://blog.adafruit.com/2020/09/30/the-long-history-of-ftp/">predates the internet itself</a>.
+It is the longest-standing internet protocol; it’s also not really secure at all. The only ARPANET users were researchers vetted by their institutions, so of course it wasn’t developed with data security in mind. FTP does not use encryption, and data is sent in plaintext – usernames &amp; passwords included.
+There are secure alternatives such as FTPS, or <a href="https://www.ssh.com/manuals/client-user/53/tunnel-ftp.html">tunneling FTP</a> through an SSH connection. But I’m no expert on that yet, and that’s not why we’re here.</p>
+
+<p>To set up our FTP connection, we’ll need a username &amp; password, which InfinityFree generates for us. We’ll also need to know the FTP address InfinityFree will use for our account. 
+All these can be found on our site dashboard under FTP Details (<code class="language-plaintext highlighter-rouge">app.infinityfree.net/accounts/your_username</code>).</p>
+
+<p>Next, we’ll need an FTP client to send our server requests for us. InfinityFree’s tutorial suggests FileZilla, but to be honest, I don’t think we need an entire GUI for this. It would be convenient to be able to transfer files without leaving the command line. A quick search on Homebrew (Apple’s package manager) suggests <code class="language-plaintext highlighter-rouge">git-ftp</code>, which sounds promising.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>brew search ftp
+<span class="o">==&gt;</span> Formulae
+bbftp-client     lftp             pure-ftpd     
+curlftpfs        ncftp            swift-protobuf
+git-ftp ✔        proftpd          swiftplate    
+</code></pre></div></div>
+
+<p>According to <a href="https://git-ftp.github.io/">its description</a>, <code class="language-plaintext highlighter-rouge">git-ftp</code> integrates with our project’s Git environment to determine file changes to upload. This FTP client was developed for Linux, but it could <em>easily</em> work on other systems, right? Sounds handy enough, so let’s try it out.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>brew <span class="nb">install </span>git-ftp
+</code></pre></div></div>
+
+<p>It’s also available <a href="https://git-ftp.github.io/">on Github</a> or <a href="https://git-ftp.github.io/">its website</a>.</p>
+
+<p>To start, we pass <code class="language-plaintext highlighter-rouge">git-ftp</code> the FTP credentials we collected earlier.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git config git-ftp.user <span class="s2">"your-ftp-username"</span>
+<span class="nv">$ </span>git config git-ftp.password <span class="s2">"your-ftp-password"</span>
+</code></pre></div></div>
+
+<p>As for the FTP address, InfinityFree gives us the plain URL <code class="language-plaintext highlighter-rouge">ftpupload.net</code>. If we type this into a browser as is, we’ll get a “connection refused” error because browsers assume HTTP or HTTPS protocols, not FTP.
+Most modern browsers do include an FTP interpreter we can apply as long as we specify the protocol:</p>
+
+<blockquote>
+  <p>ftp://ftpupload.net</p>
+</blockquote>
+
+<p>This will load a hyperlinked view of the FTP server’s file tree for our username. By default, InfinityFree generates a couple files (for example, <code class="language-plaintext highlighter-rouge">DO NOT UPLOAD FILES HERE</code>) as well as an <code class="language-plaintext highlighter-rouge">htdocs/</code> folder, which is where we should upload our site files.
+Let’s pass that on to <code class="language-plaintext highlighter-rouge">git-ftp</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git config git-ftp.url <span class="s2">"ftp://ftpupload.net/htdocs/"</span>
+</code></pre></div></div>
+
+<p>It’s worth noting that up until this point, these are purely <code class="language-plaintext highlighter-rouge">git</code> commands – we’re just defining some new variables in our <code class="language-plaintext highlighter-rouge">.git/config</code> file.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>less .git/config
+<span class="o">[</span>core]
+        repositoryformatversion <span class="o">=</span> 0
+        filemode <span class="o">=</span> <span class="nb">true
+        </span>bare <span class="o">=</span> <span class="nb">false
+        </span>logallrefupdates <span class="o">=</span> <span class="nb">true
+        </span>ignorecase <span class="o">=</span> <span class="nb">true
+        </span>precomposeunicode <span class="o">=</span> <span class="nb">true</span>
+<span class="o">[</span>branch <span class="s2">"main"</span><span class="o">]</span>
+        merge <span class="o">=</span> refs/heads/main
+<span class="o">[</span>git-ftp]
+        url <span class="o">=</span> ftp://ftpupload.net/htdocs/
+        user <span class="o">=</span> your-ftp-username
+        password <span class="o">=</span> your-ftp-password
+</code></pre></div></div>
+
+<p>Next we’ll see the real magic. To upload our site files,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git ftp init
+7 files to <span class="nb">sync</span>:
+<span class="o">[</span>1 of 7] Buffered <span class="k">for </span>upload <span class="s1">'.gitignore'</span><span class="nb">.</span>
+<span class="o">[</span>2 of 7] Buffered <span class="k">for </span>upload <span class="s1">'.ruby-version'</span><span class="nb">.</span>
+<span class="o">[</span>3 of 7] Buffered <span class="k">for </span>upload <span class="s1">'Gemfile'</span><span class="nb">.</span>
+<span class="o">[</span>4 of 7] Buffered <span class="k">for </span>upload <span class="s1">'Gemfile.lock'</span><span class="nb">.</span>
+<span class="o">[</span>5 of 7] Buffered <span class="k">for </span>upload <span class="s1">'LICENCE'</span><span class="nb">.</span>
+<span class="o">[</span>6 of 7] Buffered <span class="k">for </span>upload <span class="s1">'README.md'</span><span class="nb">.</span>
+<span class="o">[</span>7 of 7] Buffered <span class="k">for </span>upload <span class="s1">'_config.yml'</span><span class="nb">.</span>
+Uploading ...
+Last deployment changed from  to <span class="o">[</span><span class="nb">hash</span><span class="o">]</span><span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Here, we see that <code class="language-plaintext highlighter-rouge">git-ftp</code> has actually added the <code class="language-plaintext highlighter-rouge">ftp</code> sub-command to Git itself – pretty cool! Now, if we refresh <code class="language-plaintext highlighter-rouge">ftp://ftpupload.net/htdocs/</code> in our browser, we’ll see the updated file tree, including our site files.</p>
+
+<h2 id="jekyll-build">Jekyll Build</h2>
+
+<p>At this point, we can check out our site as well, and as long as we’ve uploaded an <code class="language-plaintext highlighter-rouge">index.html</code>, we’ll see its contents replacing the default splash screen! (Images and bulky files may take a few minutes to load.) 
+Of course, for me, getting the desired result was not so simple. All I got to see was:</p>
+
+<p><img src="/images/2020-11-04-exploring_free_webhosting/dev-build.png" class="mw-100" /></p>
+
+<p>… which is simply the layout template call in my development site’s <code class="language-plaintext highlighter-rouge">index.html</code>. 
+We’ll need to precompile our production site if we use tools like Jekyll, Sass, React, etc. I’ve been spoiled so far by Jekyll’s integration with Github Pages, so this hadn’t come up for me before.</p>
+
+<p>Building with Jekyll is easy enough, though.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll build
+</code></pre></div></div>
+
+<p>This generates our production site in the <code class="language-plaintext highlighter-rouge">_site</code> folder in project root.</p>
+
+<p>Now we need a way to tell <code class="language-plaintext highlighter-rouge">git-ftp</code> to send our <code class="language-plaintext highlighter-rouge">_site</code> contents instead of the entire repo.</p>
+<blockquote>
+  <p><em>There should absolutely be a <code class="language-plaintext highlighter-rouge">git-ftp</code> option to send a folder contents to remote home, but unless I’m mistaken, there doesn’t appear to be one yet.</em></p>
+</blockquote>
+
+<p>That’s okay though – we have a couple other options.</p>
+
+<h4 id="manual-setup">Manual Setup</h4>
+<p>We could declare a new Git branch in which we manually replace development files with our production site files. A clunky solution, fine for a one-time upload, but otherwise worth automating. 
+FileZilla is probably a better option than this.</p>
+
+<h4 id="with-github-actions">With Github Actions</h4>
+<p>We could automate the above process with <a href="/2020/09/19/bloghosting_odds_and_ends.html">the Github Action I wrote about here</a>. 
+<a href="https://github.com/helaili/jekyll-action">Jekyll-action</a> updates its own branch with our <code class="language-plaintext highlighter-rouge">_site</code> contents whenever we push changes to <code class="language-plaintext highlighter-rouge">main</code>.
+This requires pushing our site to a Github remote repo and fetching the Action-generated branch whenever we’d like to publish changes.
+After <a href="https://jekyllrb.com/docs/continuous-integration/github-actions/">setting up <code class="language-plaintext highlighter-rouge">jekyll-action</code></a>,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push
+<span class="nv">$ </span>git fetch generated-branch
+<span class="nv">$ </span>git ftp push <span class="nt">-b</span> generated-branch
+</code></pre></div></div>
+
+<p>It’s not ideal, having to upload our site files to both Github and FTPUpload, and the setup for <code class="language-plaintext highlighter-rouge">jekyll-action</code> is a bit involved as well; but we can at least keep our Github repo private if desired.</p>
+
+<h4 id="with-git-submodules">With Git Submodules</h4>
+<p>We could declare a new Git repo within <code class="language-plaintext highlighter-rouge">_site</code> and push <em>that</em> repo to the FTP site. For nested repositories, Git recommends their <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">submodule</a> functionality.
+To set up a submodule, first initialize the <code class="language-plaintext highlighter-rouge">_site</code> repo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>_site
+<span class="nv">$ </span>git init
+<span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"First commit."</span>
+</code></pre></div></div>
+
+<p>Then return to the parent repository, and add <code class="language-plaintext highlighter-rouge">_site</code> as a submodule.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span> ..
+<span class="nv">$ </span>git submodule add ./_site
+</code></pre></div></div>
+
+<p>From here, we’re free to setup <code class="language-plaintext highlighter-rouge">git-ftp</code> within our submodule as above.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd </span>_site
+<span class="nv">$ </span>git config git-ftp.user <span class="s2">"your-ftp-username"</span>
+<span class="nv">$ </span>git config git-ftp.password <span class="s2">"your-ftp-password"</span>
+<span class="nv">$ </span>git config git-ftp.url <span class="s2">"ftp://ftpupload.net/htdocs/"</span>
+<span class="nv">$ </span>git ftp init
+</code></pre></div></div>
+
+<p>Whenever we make changes to our development build (the parent module), all we need to do is generate a new production build and push it to FTP. 
+Jekyll leaves our submodule <code class="language-plaintext highlighter-rouge">.git</code> settings intact between builds, so our publishing workflow becomes</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll build
+<span class="nv">$ </span><span class="nb">cd </span>_site
+<span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"Commit message."</span>
+<span class="nv">$ </span>git ftp push
+</code></pre></div></div>
+
+<p>This is my favourite workflow solution of the three. It minimizes our toolset, only relying on Git and <code class="language-plaintext highlighter-rouge">git-ftp</code> (plus whichever precompiler you develop with). The setup is straightforward and intuitive, and fully contained within our CLI.</p>
+
+<hr />
+
+<p>With that, we’ve developed a basic but functional workflow for publishing static sites with a non-Github hosting service. Although we’ve only scratched the surface of server-side processes, we got our first taste, and a new sandbox to learn in.</p>
+
+<p>You can check out my published site <a href="http://stiritup.rf.gd">here</a>.</p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2020/09/28/8_git_tips_to_get_you_going.html" data-toggle="tooltip" data-placement="top" title="8 Git Tips to Get You Going">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2023/03/17/Installing_Local_Python_Packages.html" data-toggle="tooltip" data-placement="top" title="Installing Local Python Packages">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:tom.on.github@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/ciraben">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/clean-blog.min.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

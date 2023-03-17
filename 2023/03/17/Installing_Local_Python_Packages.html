@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    Installing Local Python Packages - ciraben
+    
+  </title>
+
+  <meta name="description" content="Recently, I stumbled across a weird conundrum when playing with Python code. I’ve been working on a number of small Python projects recently, and while worki...">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/vendor/fontawesome-free/css/all.min.css">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/2023/03/17/Installing_Local_Python_Packages.html">
+  <link rel="alternate" type="application/rss+xml" title="ciraben" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">ciraben</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/projects">Portfolio</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+<header class="masthead" style="background-image: url('/images/beach.jpg')">
+  
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Installing Local Python Packages</h1>
+            
+            <span class="meta">Posted 
+              <a href="#">
+                
+              </a>
+              on March 17, 2023 &middot; <span class="reading-time" title="Estimated read time">
+  
+   16 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p>Recently, I stumbled across a weird conundrum when playing with Python code. I’ve been working on a number of small Python projects recently, and while working on a problem, it occurred to me – “boy, it’d sure be handy if I used that function from another project to accomplish this!”</p>
+
+<p>After all, isn’t it a ubiquitous phrase in programming to “never solve the same problem twice” or so? If I can learn to re-use my code from other projects, then I’ll save time! I might even learn something about writing more easily repurposable code in the process.</p>
+
+<p>At first, I thought - this will be easy! I can just <code class="language-plaintext highlighter-rouge">import</code> the relevant file from my other project and be done with it. But it’s not quite so simple. As it turns out, <code class="language-plaintext highlighter-rouge">import</code> only really works for local modules contained within a subdirectory of your current working directory. If your file structure is anything like mine, <code class="language-plaintext highlighter-rouge">import</code>ing modules between projects like this is a no-go.</p>
+
+<div class="language-zsh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">.</span>
+└── my_python_projects
+    ├── project_a
+    |   └── the_module_i_wanna_import.py
+    └── project_b
+        └-- the_script_i_wanna_import_it_into.py
+
+</code></pre></div></div>
+
+<p>I know that, at the very least, I could <em>manually copy</em> my <code class="language-plaintext highlighter-rouge">project_a</code> code into <code class="language-plaintext highlighter-rouge">project_b</code>, and for some hobbyists this is fine! But to me, this solution feels cumbersome, and I know there must be something better out there!</p>
+
+<p>I also know that, at most, if we wanted to go all out, we could publish our code as a Python package on <strong><a href="https://pypi.org/">PyPi</a></strong> – then we could simply <code class="language-plaintext highlighter-rouge">pip install</code> the package whenever. However, this must be more work than necessary, right? Also, what about polluting PyPi’s package namespace? Package names can only be used once there, after all – that would be kinda selfish…</p>
+
+<p>To summarize my goal here, I’m looking for the simplest approach that:</p>
+<ul>
+  <li>lets me import <code class="language-plaintext highlighter-rouge">.py</code> files from <code class="language-plaintext highlighter-rouge">project_a</code> into <code class="language-plaintext highlighter-rouge">project_b</code></li>
+  <li>provides an easy, memorable way to update my reference to <code class="language-plaintext highlighter-rouge">project_a</code> code without leaving <code class="language-plaintext highlighter-rouge">project_b</code></li>
+  <li>minimizes polluting either local workspace with additional files/dirs</li>
+  <li>is as non-hacky a solution as possible
+After all, I want to build a workflow that I can use a lot going forward, so our solution should be simple, intuitive, &amp; unobtrusive!</li>
+</ul>
+
+<h1 id="pip-to-the-rescue"><code class="language-plaintext highlighter-rouge">pip</code> to the rescue!</h1>
+
+<p>As it turns out, <code class="language-plaintext highlighter-rouge">pip</code> provides built-in functionality for installing a local project as a package! The basic use is:</p>
+
+<div class="language-zsh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>pip <span class="nb">install</span> ../project_a
+</code></pre></div></div>
+
+<p>However, to make this work, we need to add some additional structure to <code class="language-plaintext highlighter-rouge">project_a</code> first, so that it <em>“looks”</em> like a package to <code class="language-plaintext highlighter-rouge">pip</code>. Specifically, we need to add a <code class="language-plaintext highlighter-rouge">pyproject.toml</code> file (or the archaic <code class="language-plaintext highlighter-rouge">setup.py</code> file – <strong><a href="https://bernat.tech/posts/pep-517-518/">learn more here</a></strong>) to our <code class="language-plaintext highlighter-rouge">project_a</code> directory.</p>
+
+<p>Additionally, we need our <code class="language-plaintext highlighter-rouge">.toml</code> to contain the following three lines:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[build-system]</span>
+<span class="py">requires</span> <span class="p">=</span> <span class="nn">["yourbuildsystemofchoice"]</span>
+<span class="py">build-backend</span> <span class="p">=</span> <span class="s">"yourbuildsystemofchoice.building.module"</span>
+</code></pre></div></div>
+
+<p>Here, we define a “build system” for <code class="language-plaintext highlighter-rouge">pip</code>, which tells <code class="language-plaintext highlighter-rouge">pip</code> which tool to use to build a local version of our project when running <code class="language-plaintext highlighter-rouge">pip install</code>. Some options are <code class="language-plaintext highlighter-rouge">setuptools</code> (Python’s default recommend), <code class="language-plaintext highlighter-rouge">distutils</code>  (archaic), <code class="language-plaintext highlighter-rouge">poetry</code> (hipster start-up vibes), maybe others!</p>
+
+<p>The tool that we choose determines what other structural changes we need to make to <code class="language-plaintext highlighter-rouge">project_a</code> in order to convince <code class="language-plaintext highlighter-rouge">pip</code> that it’s a package. For example, <code class="language-plaintext highlighter-rouge">setuptools</code> likes seeing a <code class="language-plaintext highlighter-rouge">setup.cfg</code> file in your <code class="language-plaintext highlighter-rouge">project_a</code> directory (though it’s not required).</p>
+
+<h1 id="the-problem-with-setuptools">The problem with <code class="language-plaintext highlighter-rouge">setuptools</code></h1>
+
+<p>On the surface, <code class="language-plaintext highlighter-rouge">setuptools</code> looks like a great option for our minimalist goal! To use, the basic requirement is to make your <code class="language-plaintext highlighter-rouge">.toml</code> look like this:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[build-system]</span>
+<span class="py">requires</span> <span class="p">=</span> <span class="nn">["setuptools"]</span>
+<span class="py">build-backend</span> <span class="p">=</span> <span class="s">"setuptools.build_meta"</span>
+<span class="nn">[project]</span>
+<span class="py">name</span> <span class="p">=</span> <span class="s">'project_name'</span>
+<span class="py">version</span> <span class="p">=</span> <span class="s">'0.0.1'</span>
+</code></pre></div></div>
+
+<p>And technically, even this still builds – a minimalist’s dream!</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[build-system]</span>
+<span class="py">requires</span> <span class="p">=</span> <span class="nn">["setuptools"]</span>
+<span class="py">build-backend</span> <span class="p">=</span> <span class="s">"setuptools.build_meta"</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note – With the minimal solution above, if exactly one <code class="language-plaintext highlighter-rouge">.py</code> file is found in your <code class="language-plaintext highlighter-rouge">project_a</code> folder, <code class="language-plaintext highlighter-rouge">setuptools</code> gives your package its name, and <code class="language-plaintext highlighter-rouge">version=0.0.0</code>. If no <code class="language-plaintext highlighter-rouge">.py</code> file is found (or if they’re hidden in subfolders) <code class="language-plaintext highlighter-rouge">setuptools</code> makes a package called <code class="language-plaintext highlighter-rouge">UNKNOWN</code> instead, <code class="language-plaintext highlighter-rouge">version=0.0.0</code>. In both cases, you can <code class="language-plaintext highlighter-rouge">import path.to.script</code> in Python, where <code class="language-plaintext highlighter-rouge">path.to.script</code> is the relative path from within <code class="language-plaintext highlighter-rouge">project_a</code>.</p>
+
+  <p>However, if two or more <code class="language-plaintext highlighter-rouge">.py</code> files sit in your <code class="language-plaintext highlighter-rouge">project_a</code> folder (instead of in subfolders), <code class="language-plaintext highlighter-rouge">pip install</code> will fail. This kinda setup needs a more fleshed out <code class="language-plaintext highlighter-rouge">.toml</code> file.</p>
+</blockquote>
+
+<p>Despite this wonderful simplicity, we run into trouble when we successfully <code class="language-plaintext highlighter-rouge">pip install</code>. You see, ever since the release of <code class="language-plaintext highlighter-rouge">pip</code> <strong>version 21.3</strong> on October 11th, 2021, <code class="language-plaintext highlighter-rouge">pip</code> switched to what they call “in-tree builds” as a way to save time &amp; space when installing local packages.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">setuptools</code> project hasn’t adjusted to this new workflow yet. As a result, if we use <code class="language-plaintext highlighter-rouge">setuptools</code> as our build system of choice (as in the <code class="language-plaintext highlighter-rouge">.toml</code> above), <code class="language-plaintext highlighter-rouge">pip install</code> pollutes your <code class="language-plaintext highlighter-rouge">project_a</code> directory with two directories called <code class="language-plaintext highlighter-rouge">build</code> and <code class="language-plaintext highlighter-rouge">project_a.egg-info</code> whenever <code class="language-plaintext highlighter-rouge">pip install</code> is used.</p>
+
+<p>Additionally, these new files/dirs hang around kinda like a cache, so if you make changes to <code class="language-plaintext highlighter-rouge">project_a</code>, you also need to remember to delete <code class="language-plaintext highlighter-rouge">project_a/build</code> in order to force <code class="language-plaintext highlighter-rouge">pip install</code> to re-build, so that your changes are incorporated. Otherwise, the cached build files are re-used, and you may not notice that your changes to <code class="language-plaintext highlighter-rouge">project_a</code> are missing from <code class="language-plaintext highlighter-rouge">project_b</code> even after a reinstall! Yuck.</p>
+
+<p>People are hot for change in <strong><a href="https://github.com/pypa/setuptools/issues/3236">this Github issue here</a></strong>, but until something is implemented, I’m steering clear of <code class="language-plaintext highlighter-rouge">setuptools</code> for our purposes.</p>
+
+<h1 id="building-with-poetry">Building with <code class="language-plaintext highlighter-rouge">poetry</code></h1>
+
+<p>Since my research shows that <code class="language-plaintext highlighter-rouge">setuptools</code> (and not <code class="language-plaintext highlighter-rouge">pip</code>) is the source of the mess described above, what about an alternative? Poetry does have stricter requirements, but let’s check it out!</p>
+
+<p>First, we need a more detailed <code class="language-plaintext highlighter-rouge">.toml</code> file – Poetry requires <strong>all</strong> the following fields:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[build-system]</span>
+<span class="py">requires</span> <span class="p">=</span> <span class="nn">["poetry-core"]</span>
+<span class="py">build-backend</span> <span class="p">=</span> <span class="s">"poetry.core.masonry.api"</span>
+
+<span class="nn">[tool.poetry]</span>
+<span class="py">name</span> <span class="p">=</span> <span class="s">"project_a"</span>
+<span class="py">version</span> <span class="p">=</span> <span class="s">"0.0.1"</span>
+<span class="py">description</span> <span class="p">=</span> <span class="s">""</span>
+<span class="py">authors</span> <span class="p">=</span> <span class="p">[</span><span class="s">"test-name &lt;test@name.com&gt;"</span><span class="p">]</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Technically, <code class="language-plaintext highlighter-rouge">pip install</code> will complete as long as <code class="language-plaintext highlighter-rouge">authors</code> contains at least one string, and that string is of the form <code class="language-plaintext highlighter-rouge">"a &lt;b&gt;"</code>, where <code class="language-plaintext highlighter-rouge">a</code> and <code class="language-plaintext highlighter-rouge">b</code> are non-whitespace strings themselves. Something like the following works fine!</p>
+</blockquote>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">authors</span> <span class="p">=</span> <span class="p">[</span><span class="s">"- &lt;-&gt;"</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Additionally, <code class="language-plaintext highlighter-rouge">poetry</code> prefers that <code class="language-plaintext highlighter-rouge">project_a</code> employ a more package-like directory structure (covered below). However, if your <code class="language-plaintext highlighter-rouge">.py</code> files are just hanging out in your <code class="language-plaintext highlighter-rouge">project_a</code> directory like in our example above, you can add the following line to your <code class="language-plaintext highlighter-rouge">.toml</code> instead:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[tool.poetry]</span>
+<span class="py">packages</span> <span class="p">=</span> <span class="p">[</span><span class="err">{include</span> <span class="err">=</span> <span class="s">"the_module_i_wanna_import.py"</span><span class="err">}</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>… And that’s it! With these requirements in place, you can run <code class="language-plaintext highlighter-rouge">pip install ../project_a</code> in your <code class="language-plaintext highlighter-rouge">project_b</code> folder, and successfully <code class="language-plaintext highlighter-rouge">import the_module_i_wanna_import</code> in Python – <em>without</em> dumping anything into your <code class="language-plaintext highlighter-rouge">project_a</code> folder as a side-effect!</p>
+
+<p>Keep in mind that <code class="language-plaintext highlighter-rouge">pip install</code> still builds a local snapshot of <code class="language-plaintext highlighter-rouge">project_a</code> for use with <code class="language-plaintext highlighter-rouge">project_b</code> – so if you want to carry over <code class="language-plaintext highlighter-rouge">project_a</code> changes, you do need to <code class="language-plaintext highlighter-rouge">pip install ../project_a</code> again to rebuild &amp; incorporate those changes into <code class="language-plaintext highlighter-rouge">project_b</code>.</p>
+
+<h1 id="keeping-it-simple">Keeping it simple</h1>
+
+<p>To populate the required <code class="language-plaintext highlighter-rouge">.toml</code> with the details <code class="language-plaintext highlighter-rouge">poetry</code> needs:</p>
+
+<div class="language-zsh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>poetry init
+</code></pre></div></div>
+
+<p>…within your <code class="language-plaintext highlighter-rouge">project_a</code> directory. This provides you an interactive prompt where you’re prompted for <code class="language-plaintext highlighter-rouge">name</code>, <code class="language-plaintext highlighter-rouge">version</code>, etc. Mostly, it’s super handy &amp; easy to remember!</p>
+
+<p>We’ve basically reached our goal, but with one caveat. <code class="language-plaintext highlighter-rouge">poetry init</code> doesn’t prompt you to customize your <code class="language-plaintext highlighter-rouge">packages</code> values – it just adds:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[tool.poetry]</span>
+<span class="py">packages</span> <span class="p">=</span> <span class="p">[</span><span class="err">{include</span> <span class="err">=</span> <span class="s">"[name]"</span><span class="err">}</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>… where <code class="language-plaintext highlighter-rouge">[name]</code> is the project name you pass at the <code class="language-plaintext highlighter-rouge">name</code> prompt. Basically, <code class="language-plaintext highlighter-rouge">poetry</code> assumes your project has a subdir that shares a name with your package.</p>
+
+<p>This means <code class="language-plaintext highlighter-rouge">pip install</code> will fail unless:</p>
+
+<ul>
+  <li>you either manually edit the package names in your <code class="language-plaintext highlighter-rouge">.toml</code>; or</li>
+  <li>you move all top-level <code class="language-plaintext highlighter-rouge">.py</code> files in <code class="language-plaintext highlighter-rouge">project_a</code> into a subfolder named <code class="language-plaintext highlighter-rouge">project_a</code> again (or similar)</li>
+</ul>
+
+<p>More on this in the last section below!</p>
+
+<h1 id="making-import-easy">Making <code class="language-plaintext highlighter-rouge">import</code> easy</h1>
+
+<p>Now, that we’ve got an easy, memorable way to install local packages, how do we make them easy to <code class="language-plaintext highlighter-rouge">import</code>  too? For example, look how nice this <code class="language-plaintext highlighter-rouge">import</code> flow is for Python’s <code class="language-plaintext highlighter-rouge">random</code> library!</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">random</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">random</span><span class="p">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>However, if we try something similar with our package, we get an error instead!</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">project_a</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">project_a</span><span class="p">.</span><span class="n">the_module_i_wanna_import</span><span class="p">.</span><span class="n">a_func</span><span class="p">()</span>
+<span class="c1"># AttributeError: module 'project_a' has no attribute 'the_module_i_wanna_import'
+</span></code></pre></div></div>
+
+<p>Note the language used in the error message here! When imported this way, Python treats <code class="language-plaintext highlighter-rouge">project_a</code> as its own module (rather than a parent package). With this kind of <code class="language-plaintext highlighter-rouge">import</code> statement, we only actually gain access to whatever’s in the parent package’s <code class="language-plaintext highlighter-rouge">__init__.py</code> (ie, nothing).</p>
+
+<p>Python doesn’t automatically give you immediate access to all the child modules like we might expect. In practice, it takes something more like the <code class="language-plaintext highlighter-rouge">import</code> below to get things right – and how ugly is that?</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">project_a.the_module_i_wanna_import</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">project_a</span><span class="p">.</span><span class="n">the_module_i_wanna_import</span><span class="p">.</span><span class="n">a_func</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>To make <code class="language-plaintext highlighter-rouge">import</code> more intuitive, we can add an <code class="language-plaintext highlighter-rouge">import</code> line to the <code class="language-plaintext highlighter-rouge">__init__.py</code> of the package itself, saving our users (or future us) a lil bit of hassle.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># __init__,py
+</span><span class="kn">import</span> <span class="nn">project_a.the_module_i_wanna_import</span> <span class="k">as</span> <span class="n">the_module_i_wanna_import</span>
+</code></pre></div></div>
+
+<p>With this added to our package-level <code class="language-plaintext highlighter-rouge">__init__.py</code>, our original <code class="language-plaintext highlighter-rouge">import</code> now works like a charm! Then just rinse and repeat, adding an <code class="language-plaintext highlighter-rouge">import</code> line to your <code class="language-plaintext highlighter-rouge">__init__.py</code> for each module in your package!</p>
+
+<blockquote>
+  <p>Technically, you can leave out the <code class="language-plaintext highlighter-rouge">as the_module_i_wanna_import</code> clause, but there’s a good reason for it! Without this, <code class="language-plaintext highlighter-rouge">project_a</code> ends up within its own scope - which means that <code class="language-plaintext highlighter-rouge">project_a.project_a</code> becomes a valid expression. If you rely on autocomplete for package/module names, this gets annoying fast. Stay up a little too late coding, and you’ll start seeing arbitrarily nested <code class="language-plaintext highlighter-rouge">project_a.project_a.project_a.the_module_i_wanna_import</code> variants littered throughout your code!</p>
+</blockquote>
+
+<h1 id="dont-like-it-have-a-cookie">Don’t like it? Have a cookie.</h1>
+
+<p>If you don’t like the default values that <code class="language-plaintext highlighter-rouge">poetry</code> suggests (or the format of the generated <code class="language-plaintext highlighter-rouge">.toml</code>), that’s “too bad” by <code class="language-plaintext highlighter-rouge">poetry</code> standards. In short, we don’t have a config option for this.</p>
+
+<p>Instead, like <strong><a href="https://stackoverflow.com/questions/61428853/how-to-change-default-pyproject-toml-that-is-generated-when-running-poetry-ne">this StackOverflow thread</a></strong> suggests, you can use a project templating tool like <code class="language-plaintext highlighter-rouge">cookiecutter</code> to start new projects from template (which you can define/customize).</p>
+
+<p>I gave <code class="language-plaintext highlighter-rouge">cookiecutter</code> a shot myself, and in short, <strong><a href="https://github.com/ciraben/.cookie">here’s what I came up with</a></strong>! I like what this tool offers because, as mentioned at the beginning of this article, I want a memorable, easy way to start new Python package projects, so that I can focus my inspired energy into those projects themselves.</p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">cookiecutter</code> is easy, even if designing your own “cookiecutter” (project template) takes a bit of getting used to. To use, simply navigate to the folder you normally add new projects to, and:</p>
+
+<div class="language-zsh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>cookiecutter https://github.com/ciraben/.cookie
+</code></pre></div></div>
+
+<p>Or you can <code class="language-plaintext highlighter-rouge">git clone</code> the repo into a <code class="language-plaintext highlighter-rouge">/cookie</code> directory within your projects folder. Then you can just run</p>
+
+<div class="language-zsh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>cookiecutter cookie
+</code></pre></div></div>
+
+<p>… and you’ll be prompted through providing a new project name &amp; details interactively!</p>
+
+<hr />
+
+<p><em>If you’d like learn more about creating your own custom <code class="language-plaintext highlighter-rouge">cookiecutter</code> template, check out <strong><a href="https://cookiecutter.readthedocs.io/en/2.0.2/tutorial2.html">the tutorial here</a></strong>! Or if, you want to learn more about basic recommended project structures, check out <strong><a href="https://docs.python-guide.org/writing/structure/">the Python structure docs here</a></strong> as well. (Keep in mind that most mention of <code class="language-plaintext highlighter-rouge">setup.py</code> can be replaced with <code class="language-plaintext highlighter-rouge">pyproject.toml</code> if you’re using <code class="language-plaintext highlighter-rouge">poetry</code> instead of <code class="language-plaintext highlighter-rouge">setuptools</code>.)</em></p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2020/11/04/Exploring_Free_Webhosting.html" data-toggle="tooltip" data-placement="top" title="Exploring Free Webhosting">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:tom.on.github@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/ciraben">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/clean-blog.min.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

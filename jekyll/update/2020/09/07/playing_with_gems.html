@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    Playing with Gems - ciraben
+    
+  </title>
+
+  <meta name="description" content="Today, I decided to teach myself some web development skills. I’ve made basic websites in the past with html &amp;amp; css, but always bumped up against certain ...">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/vendor/fontawesome-free/css/all.min.css">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/jekyll/update/2020/09/07/playing_with_gems.html">
+  <link rel="alternate" type="application/rss+xml" title="ciraben" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">ciraben</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/projects">Portfolio</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+<header class="masthead" style="background-image: url('/images/fog.jpg')">
+  
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Playing with Gems</h1>
+            
+            <span class="meta">Posted 
+              <a href="#">
+                
+              </a>
+              on September 07, 2020 &middot; <span class="reading-time" title="Estimated read time">
+  
+   11 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p>Today, I decided to teach myself some web development skills. I’ve made basic websites in the past with <code class="language-plaintext highlighter-rouge">html</code> &amp; <code class="language-plaintext highlighter-rouge">css</code>, but always bumped up against certain limits.
+Making a blog with post previews, for example, seemed like a daunting exercise in repetition &amp; coordination of multiple edited files per post — or at best, an interesting but exceedingly involved exercise in scripting.
+I was familiar enough with <code class="language-plaintext highlighter-rouge">jekyll serve</code> to know these type of problems must already have solutions, so it felt like time to familiarize myself with some new tools.</p>
+
+<p>The tools we’re learning about today are:</p>
+
+<ul>
+  <li>Jekyll</li>
+  <li>Bootstrap</li>
+  <li>rbenv</li>
+  <li>Bundler</li>
+</ul>
+
+<h2 id="jekyll">Jekyll</h2>
+
+<p>Jekyll is a powerful tool for building websites, but to be honest, I’m still just beginning to grasp what it can do. From the <a href="https://github.com/jekyll/jekyll/">readme</a>,</p>
+
+<blockquote>
+  <p>“Jekyll is a simple, blog-aware, static site generator perfect for personal, project, or organization sites.</p>
+</blockquote>
+
+<p>When I tackled my first <code class="language-plaintext highlighter-rouge">html</code> tutorial over at <a href="https://www.learnenough.com/html">Learn Enough to Be Dangerous</a> (back when it was free), I was taught that Jekyll offers a handy way to test out your website locally.
+After going through the rigmarole of installation, we can type up a quick <code class="language-plaintext highlighter-rouge">hello world</code>,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">echo</span> <span class="s1">'hello world'</span> <span class="o">&gt;</span> index.html
+</code></pre></div></div>
+
+<p>and all it takes is</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>jekyll serve
+</code></pre></div></div>
+
+<p>to see your mockup in-browser at the local address <code class="language-plaintext highlighter-rouge">http://127.168.0.1:4000</code>. The first time that worked, it felt pretty special!</p>
+
+<p>Another handy trick <a href="https://www.learnenough.com/">Learn Enough</a> taught was the basic use of layouts. 
+Using some simple markup, Jekyll offers us the ability to extract (say) our website header into its own <code class="language-plaintext highlighter-rouge">header.html</code> file. 
+Then we can include that snippet of <code class="language-plaintext highlighter-rouge">html</code> at the beginning of multiple site links. 
+The snippets get assembled during <code class="language-plaintext highlighter-rouge">jekyll serve</code> (locally) or <code class="language-plaintext highlighter-rouge">jekyll build</code> (when publishing online) and we see the conglomerated effect of them in our browser.</p>
+
+<p>This aspect of Jekyll really caught my interest. It felt like a piece of the “blog preview” puzzle. But I had other projects on the go at the time, so now, we’re checking it out.</p>
+
+<h2 id="bootstrap">Bootstrap</h2>
+
+<p>Next on my journey, I ran into Bootstrap — an entire library of standardized css classes. The initial appeal to me, was the option to focus solely on the <code class="language-plaintext highlighter-rouge">html</code> file, rather than continuously referring back to &amp; editing my stylesheet as well.</p>
+
+<p>However, Bootstrap does much more than that! 
+The entire library is built to be responsive to the size of your view-screen, with priority focus on the mobile user. 
+By using Bootstrap element classes, our webpages should at least be presentable on smartphones, tablets, and large desktop monitors alike, without wasting our time nitpicking around <code class="language-plaintext highlighter-rouge">em</code>s and <code class="language-plaintext highlighter-rouge">vw</code>s.
+For hobbyists like me with limited access to testing devices, this is a big plus.</p>
+
+<p>To apply Bootstrap to your web project, include these stylesheets in your page header:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- Latest compiled and minified CSS --&gt;</span>
+<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"</span><span class="nt">&gt;</span>
+
+<span class="c">&lt;!-- jQuery library --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+<span class="c">&lt;!-- Popper JS --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+
+<span class="c">&lt;!-- Latest compiled JavaScript --&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div></div>
+
+<p>Check out the <a href="https://www.w3schools.com/bootstrap4/bootstrap_get_started.asp">w3s tutorial</a> to get a feel for some Bootstrap basics.</p>
+
+<p>At the end of the day, Bootstrap takes care of a lot in terms of portability, but it still leaves us doing most of the legwork in terms of templating, and it sure doesn’t solve the problem of building an easily updatable blog site.</p>
+
+<p>Happily, many users have shared their own Bootstrap-based templates &amp; themes! If you really just want to get a website up and running, you can check them out <a href="https://startbootstrap.com/themes/">here</a>. Of course, for the curious, that’s not a very satisfying ending.</p>
+
+<p>I did find an <a href="https://startbootstrap.com/themes/clean-blog-jekyll/">interesting Bootstrap theme</a> that incorporates Jekyll into its templating.
+Once we have a bit more understanding of how each piece works, we’ll test it out.</p>
+
+<h2 id="rbenv">rbenv</h2>
+
+<p>Jekyll is written in Ruby &amp; distributed as a Ruby ‘gem’, aka. a portable self-contained piece of code. 
+In order to make our web-dev environment truly reproducible, we need to track which version of Ruby we’re developing with. 
+<code class="language-plaintext highlighter-rouge">rbenv</code> fills this role, in the same way that <code class="language-plaintext highlighter-rouge">virtualenv</code> does for a Python environment.</p>
+
+<p>To install <code class="language-plaintext highlighter-rouge">rbenv</code>, we can either grab it with Homebrew on Mac (<code class="language-plaintext highlighter-rouge">brew install rbenv</code>) or <code class="language-plaintext highlighter-rouge">git clone</code> from <a href="https://github.com/rbenv/rbenv">source</a>.</p>
+
+<p><code class="language-plaintext highlighter-rouge">rbenv</code> manages your Ruby versions by adding shims to your system <code class="language-plaintext highlighter-rouge">$PATH</code>. 
+Whenever we enter Ruby commands such as <code class="language-plaintext highlighter-rouge">jekyll</code> or <code class="language-plaintext highlighter-rouge">bundle</code>, they are intercepted &amp; rerouted to the appropriate binary.</p>
+
+<p>Using <code class="language-plaintext highlighter-rouge">rbenv</code> is simple. To set up a global default Ruby version,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rbenv global 2.7.0
+</code></pre></div></div>
+
+<p>(This is saved in <code class="language-plaintext highlighter-rouge">~/.rbenv/version</code>.) Or, to set up a local Ruby environment,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rbenv <span class="nb">local </span>2.7.0
+</code></pre></div></div>
+
+<p>which creates a <code class="language-plaintext highlighter-rouge">.ruby-version</code> file in your project home.</p>
+
+<h4 id="a-few-notes">A few notes:</h4>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">rbenv versions</code> checks which ruby versions are on your machine</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rbenv versions
+  system
+  2.3.3
+  2.7.0
+<span class="k">*</span> 2.7.1 <span class="o">(</span><span class="nb">set </span>by ~/playing_with_gems/.ruby-version<span class="o">)</span>
+  2.7.1_2
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">rbenv install -l</code> lists all stable ruby releases</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rbenv <span class="nb">install</span> <span class="nt">-l</span>
+2.5.8
+2.6.6
+2.7.1
+jruby-9.2.13.0
+maglev-1.0.0
+mruby-2.1.2
+rbx-5.0
+truffleruby-20.2.0
+truffleruby+graalvm-20.2.0
+</code></pre></div></div>
+
+<ul>
+  <li>and of course, <code class="language-plaintext highlighter-rouge">rbenv install VERSION</code> installs a version locally.</li>
+</ul>
+
+<h2 id="bundler">Bundler</h2>
+
+<p>With our Ruby environment set up, our next task is managing versions for our gems, which is where Bundler comes in.</p>
+
+<p>Bundler tracks gem dependencies. Although <code class="language-plaintext highlighter-rouge">gem</code> is the Ruby package manager, we will be sending all our install requests to <code class="language-plaintext highlighter-rouge">gem</code> via Bundler. 
+We will also execute any gem commands (like <code class="language-plaintext highlighter-rouge">jekyll serve</code>) via Bundler using the <code class="language-plaintext highlighter-rouge">bundle exec</code> prefix. 
+Along with <code class="language-plaintext highlighter-rouge">rbenv</code>, Bundler ensures a reproducible Ruby environment.</p>
+
+<p>Install Bundler with <code class="language-plaintext highlighter-rouge">gem</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gem <span class="nb">install </span>bundler
+</code></pre></div></div>
+
+<p>And record gem versions with a file called <code class="language-plaintext highlighter-rouge">Gemfile</code> (or let Bundler add them for you).</p>
+
+<hr />
+
+<h1 id="the-essentials">The Essentials</h1>
+
+<p>Say we want to set up an environment to develop a website using Jekyll, and maybe add some other gems along the way.</p>
+
+<h3 id="git">Git</h3>
+
+<p>First, of course, set up version control:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git init
+</code></pre></div></div>
+
+<h3 id="rbenv-1">rbenv</h3>
+
+<p>Then, use <code class="language-plaintext highlighter-rouge">rbenv</code> to declare which version of Ruby to use.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>rbenv version 2.7.1
+</code></pre></div></div>
+
+<h3 id="bundler-1">Bundler</h3>
+
+<p>Next, initialize our <code class="language-plaintext highlighter-rouge">Gemfile</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle init
+</code></pre></div></div>
+
+<p>Optionally, declare a directory to hold installed gems.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle config <span class="nb">set</span> <span class="nt">--local</span> path <span class="s1">'vendor/bundle'</span>
+</code></pre></div></div>
+
+<p>When we <code class="language-plaintext highlighter-rouge">bundle add</code> gems to our <code class="language-plaintext highlighter-rouge">Gemfile</code>, Bundler auto-installs dependencies as well.</p>
+
+<h3 id="jekyll-1">Jekyll</h3>
+
+<p>To use Jekyll in our project,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle add jekyll
+</code></pre></div></div>
+
+<p>If that works, great! However, in my case I had to wrestle with a rather opaque issue. 
+One dependency of Jekyll, <code class="language-plaintext highlighter-rouge">http-parser.gm</code>, will throw install errors via Bundler if your working directory has any <em>spaces</em> in its address. 
+Aside from the obvious workaround, see <a href="https://github.com/tmm1/http_parser.rb/issues/47">here</a> for other ideas.</p>
+
+<p>Once Jekyll is added succesfully, we create a Jekyll scaffold for our site. Remember to wrap Jekyll commands within <code class="language-plaintext highlighter-rouge">bundle exec</code> like so:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll new <span class="nt">--force</span> <span class="nt">--skip-bundle</span> <span class="nb">.</span>
+<span class="nv">$ </span>bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>If, like me, you set Bundler to store gems in a local directory like ‘bundles’, rather than ‘vendor/bundle’ specifically, then there’s one more step before serving. We need to tell Jekyll <strong>not</strong> to scan our gems for blog posts! (Jekyll interprets Markdown files such as READMEs as blog posts which can lead to formatting issues in this case.)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">echo</span> <span class="s2">"exclude: ['bundle/']"</span> <span class="o">&gt;&gt;</span> _config.yml
+</code></pre></div></div>
+
+<p>Alright, with that, it’s time to serve!</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll serve
+</code></pre></div></div>
+
+<p>Notably, if you want to view your locally hosted site from other devices (e.g. a smartphone):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll serve <span class="nt">--host</span> 0.0.0.0
+</code></pre></div></div>
+
+<p>Then we can view our site at <code class="language-plaintext highlighter-rouge">192.168.X.Y:4000</code> for other devices (where X.Y is the host device’s local address), and <code class="language-plaintext highlighter-rouge">0.0.0.0:4000</code> on the host machine.</p>
+
+<p>(Check your local address with <code class="language-plaintext highlighter-rouge">ifconfig | grep 192.168</code> on Mac.)</p>
+
+<p>My fave Jekyll serve call also auto-refreshes browser tabs when we save changes to hosted files:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle <span class="nb">exec </span>jekyll serve <span class="nt">--livereload</span> <span class="nt">--host</span> 0.0.0.0
+</code></pre></div></div>
+
+<p>Super handy. :)</p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          
+          <a class="btn btn-primary float-right" href="/2020/09/19/bloghosting_odds_and_ends.html" data-toggle="tooltip" data-placement="top" title="Blog-Hosting Odds & Ends">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:tom.on.github@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/ciraben">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/clean-blog.min.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

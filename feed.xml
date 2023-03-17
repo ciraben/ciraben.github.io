@@ -1,0 +1,1197 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-03-17T22:48:07+00:00</updated><id>/feed.xml</id><title type="html">ciraben</title><subtitle>just a hobbyist with heart </subtitle><entry><title type="html">Installing Local Python Packages</title><link href="/2023/03/17/Installing_Local_Python_Packages.html" rel="alternate" type="text/html" title="Installing Local Python Packages" /><published>2023-03-17T19:00:00+00:00</published><updated>2023-03-17T19:00:00+00:00</updated><id>/2023/03/17/Installing_Local_Python_Packages</id><content type="html" xml:base="/2023/03/17/Installing_Local_Python_Packages.html">&lt;p&gt;Recently, I stumbled across a weird conundrum when playing with Python code. I’ve been working on a number of small Python projects recently, and while working on a problem, it occurred to me – “boy, it’d sure be handy if I used that function from another project to accomplish this!”&lt;/p&gt;
+
+&lt;p&gt;After all, isn’t it a ubiquitous phrase in programming to “never solve the same problem twice” or so? If I can learn to re-use my code from other projects, then I’ll save time! I might even learn something about writing more easily repurposable code in the process.&lt;/p&gt;
+
+&lt;p&gt;At first, I thought - this will be easy! I can just &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; the relevant file from my other project and be done with it. But it’s not quite so simple. As it turns out, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; only really works for local modules contained within a subdirectory of your current working directory. If your file structure is anything like mine, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt;ing modules between projects like this is a no-go.&lt;/p&gt;
+
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+└── my_python_projects
+    ├── project_a
+    |   └── the_module_i_wanna_import.py
+    └── project_b
+        └-- the_script_i_wanna_import_it_into.py
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I know that, at the very least, I could &lt;em&gt;manually copy&lt;/em&gt; my &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; code into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt;, and for some hobbyists this is fine! But to me, this solution feels cumbersome, and I know there must be something better out there!&lt;/p&gt;
+
+&lt;p&gt;I also know that, at most, if we wanted to go all out, we could publish our code as a Python package on &lt;strong&gt;&lt;a href=&quot;https://pypi.org/&quot;&gt;PyPi&lt;/a&gt;&lt;/strong&gt; – then we could simply &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; the package whenever. However, this must be more work than necessary, right? Also, what about polluting PyPi’s package namespace? Package names can only be used once there, after all – that would be kinda selfish…&lt;/p&gt;
+
+&lt;p&gt;To summarize my goal here, I’m looking for the simplest approach that:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;lets me import &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; files from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;provides an easy, memorable way to update my reference to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; code without leaving &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;minimizes polluting either local workspace with additional files/dirs&lt;/li&gt;
+  &lt;li&gt;is as non-hacky a solution as possible
+After all, I want to build a workflow that I can use a lot going forward, so our solution should be simple, intuitive, &amp;amp; unobtrusive!&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;pip-to-the-rescue&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; to the rescue!&lt;/h1&gt;
+
+&lt;p&gt;As it turns out, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; provides built-in functionality for installing a local project as a package! The basic use is:&lt;/p&gt;
+
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;pip &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt; ../project_a
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, to make this work, we need to add some additional structure to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; first, so that it &lt;em&gt;“looks”&lt;/em&gt; like a package to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt;. Specifically, we need to add a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pyproject.toml&lt;/code&gt; file (or the archaic &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setup.py&lt;/code&gt; file – &lt;strong&gt;&lt;a href=&quot;https://bernat.tech/posts/pep-517-518/&quot;&gt;learn more here&lt;/a&gt;&lt;/strong&gt;) to our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;p&gt;Additionally, we need our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; to contain the following three lines:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[build-system]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;[&quot;yourbuildsystemofchoice&quot;]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;build-backend&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;yourbuildsystemofchoice.building.module&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here, we define a “build system” for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt;, which tells &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; which tool to use to build a local version of our project when running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt;. Some options are &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; (Python’s default recommend), &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;distutils&lt;/code&gt;  (archaic), &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; (hipster start-up vibes), maybe others!&lt;/p&gt;
+
+&lt;p&gt;The tool that we choose determines what other structural changes we need to make to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; in order to convince &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; that it’s a package. For example, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; likes seeing a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setup.cfg&lt;/code&gt; file in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; directory (though it’s not required).&lt;/p&gt;
+
+&lt;h1 id=&quot;the-problem-with-setuptools&quot;&gt;The problem with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt;&lt;/h1&gt;
+
+&lt;p&gt;On the surface, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; looks like a great option for our minimalist goal! To use, the basic requirement is to make your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; look like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[build-system]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;[&quot;setuptools&quot;]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;build-backend&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;setuptools.build_meta&quot;&lt;/span&gt;
+&lt;span class=&quot;nn&quot;&gt;[project]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'project_name'&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'0.0.1'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And technically, even this still builds – a minimalist’s dream!&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[build-system]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;[&quot;setuptools&quot;]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;build-backend&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;setuptools.build_meta&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note – With the minimal solution above, if exactly one &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; file is found in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; folder, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; gives your package its name, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;version=0.0.0&lt;/code&gt;. If no &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; file is found (or if they’re hidden in subfolders) &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; makes a package called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;UNKNOWN&lt;/code&gt; instead, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;version=0.0.0&lt;/code&gt;. In both cases, you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import path.to.script&lt;/code&gt; in Python, where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;path.to.script&lt;/code&gt; is the relative path from within &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt;.&lt;/p&gt;
+
+  &lt;p&gt;However, if two or more &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; files sit in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; folder (instead of in subfolders), &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; will fail. This kinda setup needs a more fleshed out &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; file.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Despite this wonderful simplicity, we run into trouble when we successfully &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt;. You see, ever since the release of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; &lt;strong&gt;version 21.3&lt;/strong&gt; on October 11th, 2021, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; switched to what they call “in-tree builds” as a way to save time &amp;amp; space when installing local packages.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; project hasn’t adjusted to this new workflow yet. As a result, if we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; as our build system of choice (as in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; above), &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; pollutes your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; directory with two directories called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;build&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a.egg-info&lt;/code&gt; whenever &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; is used.&lt;/p&gt;
+
+&lt;p&gt;Additionally, these new files/dirs hang around kinda like a cache, so if you make changes to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt;, you also need to remember to delete &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a/build&lt;/code&gt; in order to force &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; to re-build, so that your changes are incorporated. Otherwise, the cached build files are re-used, and you may not notice that your changes to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; are missing from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt; even after a reinstall! Yuck.&lt;/p&gt;
+
+&lt;p&gt;People are hot for change in &lt;strong&gt;&lt;a href=&quot;https://github.com/pypa/setuptools/issues/3236&quot;&gt;this Github issue here&lt;/a&gt;&lt;/strong&gt;, but until something is implemented, I’m steering clear of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; for our purposes.&lt;/p&gt;
+
+&lt;h1 id=&quot;building-with-poetry&quot;&gt;Building with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt;&lt;/h1&gt;
+
+&lt;p&gt;Since my research shows that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt; (and not &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt;) is the source of the mess described above, what about an alternative? Poetry does have stricter requirements, but let’s check it out!&lt;/p&gt;
+
+&lt;p&gt;First, we need a more detailed &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; file – Poetry requires &lt;strong&gt;all&lt;/strong&gt; the following fields:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[build-system]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;requires&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;[&quot;poetry-core&quot;]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;build-backend&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;poetry.core.masonry.api&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nn&quot;&gt;[tool.poetry]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;project_a&quot;&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;0.0.1&quot;&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;&quot;&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;authors&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;test-name &amp;lt;test@name.com&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Technically, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; will complete as long as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;authors&lt;/code&gt; contains at least one string, and that string is of the form &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&quot;a &amp;lt;b&amp;gt;&quot;&lt;/code&gt;, where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;a&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b&lt;/code&gt; are non-whitespace strings themselves. Something like the following works fine!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;py&quot;&gt;authors&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;- &amp;lt;-&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Additionally, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; prefers that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; employ a more package-like directory structure (covered below). However, if your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; files are just hanging out in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; directory like in our example above, you can add the following line to your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; instead:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[tool.poetry]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;packages&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;{include&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;the_module_i_wanna_import.py&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;… And that’s it! With these requirements in place, you can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install ../project_a&lt;/code&gt; in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt; folder, and successfully &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import the_module_i_wanna_import&lt;/code&gt; in Python – &lt;em&gt;without&lt;/em&gt; dumping anything into your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; folder as a side-effect!&lt;/p&gt;
+
+&lt;p&gt;Keep in mind that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; still builds a local snapshot of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; for use with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt; – so if you want to carry over &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; changes, you do need to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install ../project_a&lt;/code&gt; again to rebuild &amp;amp; incorporate those changes into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_b&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;keeping-it-simple&quot;&gt;Keeping it simple&lt;/h1&gt;
+
+&lt;p&gt;To populate the required &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt; with the details &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; needs:&lt;/p&gt;
+
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;poetry init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;…within your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; directory. This provides you an interactive prompt where you’re prompted for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;version&lt;/code&gt;, etc. Mostly, it’s super handy &amp;amp; easy to remember!&lt;/p&gt;
+
+&lt;p&gt;We’ve basically reached our goal, but with one caveat. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry init&lt;/code&gt; doesn’t prompt you to customize your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;packages&lt;/code&gt; values – it just adds:&lt;/p&gt;
+
+&lt;div class=&quot;language-toml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;[tool.poetry]&lt;/span&gt;
+&lt;span class=&quot;py&quot;&gt;packages&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;{include&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;[name]&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;… where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[name]&lt;/code&gt; is the project name you pass at the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt; prompt. Basically, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; assumes your project has a subdir that shares a name with your package.&lt;/p&gt;
+
+&lt;p&gt;This means &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip install&lt;/code&gt; will fail unless:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;you either manually edit the package names in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt;; or&lt;/li&gt;
+  &lt;li&gt;you move all top-level &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.py&lt;/code&gt; files in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; into a subfolder named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; again (or similar)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;More on this in the last section below!&lt;/p&gt;
+
+&lt;h1 id=&quot;making-import-easy&quot;&gt;Making &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; easy&lt;/h1&gt;
+
+&lt;p&gt;Now, that we’ve got an easy, memorable way to install local packages, how do we make them easy to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt;  too? For example, look how nice this &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; flow is for Python’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;random&lt;/code&gt; library!&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;random&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randrange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, if we try something similar with our package, we get an error instead!&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;project_a&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project_a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;the_module_i_wanna_import&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# AttributeError: module 'project_a' has no attribute 'the_module_i_wanna_import'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note the language used in the error message here! When imported this way, Python treats &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; as its own module (rather than a parent package). With this kind of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; statement, we only actually gain access to whatever’s in the parent package’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__init__.py&lt;/code&gt; (ie, nothing).&lt;/p&gt;
+
+&lt;p&gt;Python doesn’t automatically give you immediate access to all the child modules like we might expect. In practice, it takes something more like the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; below to get things right – and how ugly is that?&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;project_a.the_module_i_wanna_import&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;project_a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;the_module_i_wanna_import&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To make &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; more intuitive, we can add an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; line to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__init__.py&lt;/code&gt; of the package itself, saving our users (or future us) a lil bit of hassle.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# __init__,py
+&lt;/span&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;project_a.the_module_i_wanna_import&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the_module_i_wanna_import&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;With this added to our package-level &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__init__.py&lt;/code&gt;, our original &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; now works like a charm! Then just rinse and repeat, adding an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;import&lt;/code&gt; line to your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__init__.py&lt;/code&gt; for each module in your package!&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Technically, you can leave out the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;as the_module_i_wanna_import&lt;/code&gt; clause, but there’s a good reason for it! Without this, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a&lt;/code&gt; ends up within its own scope - which means that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a.project_a&lt;/code&gt; becomes a valid expression. If you rely on autocomplete for package/module names, this gets annoying fast. Stay up a little too late coding, and you’ll start seeing arbitrarily nested &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;project_a.project_a.project_a.the_module_i_wanna_import&lt;/code&gt; variants littered throughout your code!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;dont-like-it-have-a-cookie&quot;&gt;Don’t like it? Have a cookie.&lt;/h1&gt;
+
+&lt;p&gt;If you don’t like the default values that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; suggests (or the format of the generated &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.toml&lt;/code&gt;), that’s “too bad” by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; standards. In short, we don’t have a config option for this.&lt;/p&gt;
+
+&lt;p&gt;Instead, like &lt;strong&gt;&lt;a href=&quot;https://stackoverflow.com/questions/61428853/how-to-change-default-pyproject-toml-that-is-generated-when-running-poetry-ne&quot;&gt;this StackOverflow thread&lt;/a&gt;&lt;/strong&gt; suggests, you can use a project templating tool like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cookiecutter&lt;/code&gt; to start new projects from template (which you can define/customize).&lt;/p&gt;
+
+&lt;p&gt;I gave &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cookiecutter&lt;/code&gt; a shot myself, and in short, &lt;strong&gt;&lt;a href=&quot;https://github.com/ciraben/.cookie&quot;&gt;here’s what I came up with&lt;/a&gt;&lt;/strong&gt;! I like what this tool offers because, as mentioned at the beginning of this article, I want a memorable, easy way to start new Python package projects, so that I can focus my inspired energy into those projects themselves.&lt;/p&gt;
+
+&lt;p&gt;Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cookiecutter&lt;/code&gt; is easy, even if designing your own “cookiecutter” (project template) takes a bit of getting used to. To use, simply navigate to the folder you normally add new projects to, and:&lt;/p&gt;
+
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;cookiecutter https://github.com/ciraben/.cookie
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Or you can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git clone&lt;/code&gt; the repo into a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/cookie&lt;/code&gt; directory within your projects folder. Then you can just run&lt;/p&gt;
+
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;cookiecutter cookie
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;… and you’ll be prompted through providing a new project name &amp;amp; details interactively!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;em&gt;If you’d like learn more about creating your own custom &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cookiecutter&lt;/code&gt; template, check out &lt;strong&gt;&lt;a href=&quot;https://cookiecutter.readthedocs.io/en/2.0.2/tutorial2.html&quot;&gt;the tutorial here&lt;/a&gt;&lt;/strong&gt;! Or if, you want to learn more about basic recommended project structures, check out &lt;strong&gt;&lt;a href=&quot;https://docs.python-guide.org/writing/structure/&quot;&gt;the Python structure docs here&lt;/a&gt;&lt;/strong&gt; as well. (Keep in mind that most mention of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setup.py&lt;/code&gt; can be replaced with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pyproject.toml&lt;/code&gt; if you’re using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;poetry&lt;/code&gt; instead of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;setuptools&lt;/code&gt;.)&lt;/em&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">Recently, I stumbled across a weird conundrum when playing with Python code. I’ve been working on a number of small Python projects recently, and while working on a problem, it occurred to me – “boy, it’d sure be handy if I used that function from another project to accomplish this!”</summary></entry><entry><title type="html">Exploring Free Webhosting</title><link href="/2020/11/04/Exploring_Free_Webhosting.html" rel="alternate" type="text/html" title="Exploring Free Webhosting" /><published>2020-11-04T19:00:00+00:00</published><updated>2020-11-04T19:00:00+00:00</updated><id>/2020/11/04/Exploring_Free_Webhosting</id><content type="html" xml:base="/2020/11/04/Exploring_Free_Webhosting.html">&lt;p&gt;I’ve started to get a decent grasp of front-end web development and some of the popular tools that are available to facilitate the process. 
+However, my experience up until this point has been limited to Github Pages. I’m curious about that other, server-side piece.&lt;/p&gt;
+
+&lt;p&gt;Recently, I’ve taken on a project I’d like to host outside of Github. A new experience! We’re going to take a look at that process here.
+My project is a static business landing page with some javascript elements, so it feels like it will be a good test-case. To build the site, I used &lt;a href=&quot;/jekyll/update/2020/09/07/playing_with_gems.html&quot;&gt;the toolkit I wrote about here&lt;/a&gt;, including Jekyll, Bootstrap and Sass. I’ve tested it out locally &amp;amp; I’m satisfied with how it looks, so let’s look at publishing it online.&lt;/p&gt;
+
+&lt;p&gt;From &lt;a href=&quot;&quot;&gt;this list of free webhosting services&lt;/a&gt;, I chose to work with &lt;a href=&quot;https://infinityfree.net&quot;&gt;infinityfree.net&lt;/a&gt; due to its fast advertised load times &amp;amp; forever-free service.&lt;/p&gt;
+
+&lt;h2 id=&quot;file-transfer-with-ftp&quot;&gt;File Transfer with FTP&lt;/h2&gt;
+
+&lt;p&gt;Logging into our brand new InfinityFree account, we’re met with a plethora of admin tabs and configuration options – definitely a little overwhelming at first.
+First, we create a new hosting account under the Accounts tab and select Manage, which takes us to our site dashboard.
+From here, our next step is to figure out how to upload our file tree. InfinityFree recommends &lt;a href=&quot;https://support.infinityfree.net/files/how-to-upload-files-with-ftp/&quot;&gt;uploading files with FTP&lt;/a&gt;, which is a relatively new concept for me.&lt;/p&gt;
+
+&lt;p&gt;On the other hand, FTP (File Transfer Protocol) is an &lt;em&gt;old&lt;/em&gt; concept in the history of the internet. In fact, first developed for ARPANET, FTP &lt;a href=&quot;https://blog.adafruit.com/2020/09/30/the-long-history-of-ftp/&quot;&gt;predates the internet itself&lt;/a&gt;.
+It is the longest-standing internet protocol; it’s also not really secure at all. The only ARPANET users were researchers vetted by their institutions, so of course it wasn’t developed with data security in mind. FTP does not use encryption, and data is sent in plaintext – usernames &amp;amp; passwords included.
+There are secure alternatives such as FTPS, or &lt;a href=&quot;https://www.ssh.com/manuals/client-user/53/tunnel-ftp.html&quot;&gt;tunneling FTP&lt;/a&gt; through an SSH connection. But I’m no expert on that yet, and that’s not why we’re here.&lt;/p&gt;
+
+&lt;p&gt;To set up our FTP connection, we’ll need a username &amp;amp; password, which InfinityFree generates for us. We’ll also need to know the FTP address InfinityFree will use for our account. 
+All these can be found on our site dashboard under FTP Details (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;app.infinityfree.net/accounts/your_username&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;Next, we’ll need an FTP client to send our server requests for us. InfinityFree’s tutorial suggests FileZilla, but to be honest, I don’t think we need an entire GUI for this. It would be convenient to be able to transfer files without leaving the command line. A quick search on Homebrew (Apple’s package manager) suggests &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt;, which sounds promising.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;brew search ftp
+&lt;span class=&quot;o&quot;&gt;==&amp;gt;&lt;/span&gt; Formulae
+bbftp-client     lftp             pure-ftpd     
+curlftpfs        ncftp            swift-protobuf
+git-ftp ✔        proftpd          swiftplate    
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;According to &lt;a href=&quot;https://git-ftp.github.io/&quot;&gt;its description&lt;/a&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; integrates with our project’s Git environment to determine file changes to upload. This FTP client was developed for Linux, but it could &lt;em&gt;easily&lt;/em&gt; work on other systems, right? Sounds handy enough, so let’s try it out.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;brew &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;git-ftp
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It’s also available &lt;a href=&quot;https://git-ftp.github.io/&quot;&gt;on Github&lt;/a&gt; or &lt;a href=&quot;https://git-ftp.github.io/&quot;&gt;its website&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;To start, we pass &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; the FTP credentials we collected earlier.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.user &lt;span class=&quot;s2&quot;&gt;&quot;your-ftp-username&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.password &lt;span class=&quot;s2&quot;&gt;&quot;your-ftp-password&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As for the FTP address, InfinityFree gives us the plain URL &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ftpupload.net&lt;/code&gt;. If we type this into a browser as is, we’ll get a “connection refused” error because browsers assume HTTP or HTTPS protocols, not FTP.
+Most modern browsers do include an FTP interpreter we can apply as long as we specify the protocol:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;ftp://ftpupload.net&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This will load a hyperlinked view of the FTP server’s file tree for our username. By default, InfinityFree generates a couple files (for example, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DO NOT UPLOAD FILES HERE&lt;/code&gt;) as well as an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;htdocs/&lt;/code&gt; folder, which is where we should upload our site files.
+Let’s pass that on to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.url &lt;span class=&quot;s2&quot;&gt;&quot;ftp://ftpupload.net/htdocs/&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It’s worth noting that up until this point, these are purely &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git&lt;/code&gt; commands – we’re just defining some new variables in our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git/config&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;less .git/config
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;core]
+        repositoryformatversion &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 0
+        filemode &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true
+        &lt;/span&gt;bare &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;false
+        &lt;/span&gt;logallrefupdates &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true
+        &lt;/span&gt;ignorecase &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true
+        &lt;/span&gt;precomposeunicode &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;branch &lt;span class=&quot;s2&quot;&gt;&quot;main&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;
+        merge &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; refs/heads/main
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;git-ftp]
+        url &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ftp://ftpupload.net/htdocs/
+        user &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; your-ftp-username
+        password &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; your-ftp-password
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next we’ll see the real magic. To upload our site files,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git ftp init
+7 files to &lt;span class=&quot;nb&quot;&gt;sync&lt;/span&gt;:
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;1 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'.gitignore'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;2 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'.ruby-version'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;3 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'Gemfile'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;4 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'Gemfile.lock'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;5 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'LICENCE'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;6 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'README.md'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;7 of 7] Buffered &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;upload &lt;span class=&quot;s1&quot;&gt;'_config.yml'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+Uploading ...
+Last deployment changed from  to &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here, we see that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; has actually added the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ftp&lt;/code&gt; sub-command to Git itself – pretty cool! Now, if we refresh &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ftp://ftpupload.net/htdocs/&lt;/code&gt; in our browser, we’ll see the updated file tree, including our site files.&lt;/p&gt;
+
+&lt;h2 id=&quot;jekyll-build&quot;&gt;Jekyll Build&lt;/h2&gt;
+
+&lt;p&gt;At this point, we can check out our site as well, and as long as we’ve uploaded an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;index.html&lt;/code&gt;, we’ll see its contents replacing the default splash screen! (Images and bulky files may take a few minutes to load.) 
+Of course, for me, getting the desired result was not so simple. All I got to see was:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2020-11-04-exploring_free_webhosting/dev-build.png&quot; class=&quot;mw-100&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;… which is simply the layout template call in my development site’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;index.html&lt;/code&gt;. 
+We’ll need to precompile our production site if we use tools like Jekyll, Sass, React, etc. I’ve been spoiled so far by Jekyll’s integration with Github Pages, so this hadn’t come up for me before.&lt;/p&gt;
+
+&lt;p&gt;Building with Jekyll is easy enough, though.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll build
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This generates our production site in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; folder in project root.&lt;/p&gt;
+
+&lt;p&gt;Now we need a way to tell &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; to send our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; contents instead of the entire repo.&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;em&gt;There should absolutely be a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; option to send a folder contents to remote home, but unless I’m mistaken, there doesn’t appear to be one yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;That’s okay though – we have a couple other options.&lt;/p&gt;
+
+&lt;h4 id=&quot;manual-setup&quot;&gt;Manual Setup&lt;/h4&gt;
+&lt;p&gt;We could declare a new Git branch in which we manually replace development files with our production site files. A clunky solution, fine for a one-time upload, but otherwise worth automating. 
+FileZilla is probably a better option than this.&lt;/p&gt;
+
+&lt;h4 id=&quot;with-github-actions&quot;&gt;With Github Actions&lt;/h4&gt;
+&lt;p&gt;We could automate the above process with &lt;a href=&quot;/2020/09/19/bloghosting_odds_and_ends.html&quot;&gt;the Github Action I wrote about here&lt;/a&gt;. 
+&lt;a href=&quot;https://github.com/helaili/jekyll-action&quot;&gt;Jekyll-action&lt;/a&gt; updates its own branch with our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; contents whenever we push changes to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt;.
+This requires pushing our site to a Github remote repo and fetching the Action-generated branch whenever we’d like to publish changes.
+After &lt;a href=&quot;https://jekyllrb.com/docs/continuous-integration/github-actions/&quot;&gt;setting up &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-action&lt;/code&gt;&lt;/a&gt;,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git fetch generated-branch
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git ftp push &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; generated-branch
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It’s not ideal, having to upload our site files to both Github and FTPUpload, and the setup for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-action&lt;/code&gt; is a bit involved as well; but we can at least keep our Github repo private if desired.&lt;/p&gt;
+
+&lt;h4 id=&quot;with-git-submodules&quot;&gt;With Git Submodules&lt;/h4&gt;
+&lt;p&gt;We could declare a new Git repo within &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; and push &lt;em&gt;that&lt;/em&gt; repo to the FTP site. For nested repositories, Git recommends their &lt;a href=&quot;https://git-scm.com/book/en/v2/Git-Tools-Submodules&quot;&gt;submodule&lt;/a&gt; functionality.
+To set up a submodule, first initialize the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; repo:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;_site
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git init
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;First commit.&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then return to the parent repository, and add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; as a submodule.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git submodule add ./_site
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;From here, we’re free to setup &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; within our submodule as above.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;_site
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.user &lt;span class=&quot;s2&quot;&gt;&quot;your-ftp-username&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.password &lt;span class=&quot;s2&quot;&gt;&quot;your-ftp-password&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config git-ftp.url &lt;span class=&quot;s2&quot;&gt;&quot;ftp://ftpupload.net/htdocs/&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git ftp init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Whenever we make changes to our development build (the parent module), all we need to do is generate a new production build and push it to FTP. 
+Jekyll leaves our submodule &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.git&lt;/code&gt; settings intact between builds, so our publishing workflow becomes&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll build
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;_site
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Commit message.&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git ftp push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This is my favourite workflow solution of the three. It minimizes our toolset, only relying on Git and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git-ftp&lt;/code&gt; (plus whichever precompiler you develop with). The setup is straightforward and intuitive, and fully contained within our CLI.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;With that, we’ve developed a basic but functional workflow for publishing static sites with a non-Github hosting service. Although we’ve only scratched the surface of server-side processes, we got our first taste, and a new sandbox to learn in.&lt;/p&gt;
+
+&lt;p&gt;You can check out my published site &lt;a href=&quot;http://stiritup.rf.gd&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">I’ve started to get a decent grasp of front-end web development and some of the popular tools that are available to facilitate the process. However, my experience up until this point has been limited to Github Pages. I’m curious about that other, server-side piece.</summary></entry><entry><title type="html">8 Git Tips to Get You Going</title><link href="/2020/09/28/8_git_tips_to_get_you_going.html" rel="alternate" type="text/html" title="8 Git Tips to Get You Going" /><published>2020-09-28T23:00:00+00:00</published><updated>2020-09-28T23:00:00+00:00</updated><id>/2020/09/28/8_git_tips_to_get_you_going</id><content type="html" xml:base="/2020/09/28/8_git_tips_to_get_you_going.html">&lt;p&gt;Sometimes, in between projects, I lose track of all the Git tips I’ve learned. Here are some of my faves.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-master-branch&quot;&gt;The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; branch&lt;/h3&gt;
+
+&lt;p&gt;Tired of seeing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; all over your projects? As Scott Hanselman suggests, here’s a one-time fix to change the term to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; (or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;latest&lt;/code&gt;, or whatever):&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git config &lt;span class=&quot;nt&quot;&gt;--global&lt;/span&gt; init.defaultBranch main
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Check &lt;a href=&quot;https://www.hanselman.com/blog/EasilyRenameYourGitDefaultBranchFromMasterToMain.aspx&quot;&gt;his article&lt;/a&gt; for details on amending projects in progress.&lt;/p&gt;
+
+&lt;h3 id=&quot;making-a-new-repository&quot;&gt;Making a new repository&lt;/h3&gt;
+
+&lt;p&gt;Here’s the standard:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git init
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;touch&lt;/span&gt; .gitignore
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;(Since I edit in vim, I’ll also add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;*.swp&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.gitignore&lt;/code&gt; right off the bat.) 
+Next, make a new repository on Github, grab the generated address and:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git remote add origin ADDRESS
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; origin main
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;If you’re ready to start versioning, you can.&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git tag &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; v0.1.0
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin &lt;span class=&quot;nt&quot;&gt;--tags&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;There’s instructions for setting up a tag as a Github release later in this post.&lt;/p&gt;
+
+&lt;h3 id=&quot;working-on-an-established-repository&quot;&gt;Working on an Established Repository&lt;/h3&gt;
+
+&lt;p&gt;One feature that makes Git so powerful is branching – the ability to put down our work on one feature &amp;amp; pick up work on another without hassle.&lt;/p&gt;
+
+&lt;p&gt;For example, we’re writing a new post for our nifty tech blog, and we come across a typo in an old post.
+By checking out a new Git branch, we can put our writing on hold to fix the typo &amp;amp; push a quick update without pushing our unfinished post.
+This gets even handier when the features in question impact multiple (or overlapping!) files.
+Essentially, this is the Git feature which facilitates teamwork best, and it’s handy on your own too.
+What does this look like in practice?&lt;/p&gt;
+
+&lt;p&gt;Let’s illustrate a typical workflow. Say we have a stable project established on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; and we want to work on a new (possibly build-breaking) feature. First, check out a new branch.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git checkout &lt;span class=&quot;nt&quot;&gt;-b&lt;/span&gt; new-feature
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can see we’re now on the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new-feature&lt;/code&gt; branch - any commits will be recorded here instead of on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git branch
+  main
+&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; new-feature
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After making some commits and successfully testing our new feature, we can add it to our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; project.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git checkout main
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git merge new-feature
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If we’re testing a new Github Pages site addition, or we’re collaborating with others, we can push &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new-feature&lt;/code&gt; to a new remote branch:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git checkout new-feature
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To also set &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new-feature&lt;/code&gt; to track its remote counterpart,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; origin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;(This ensures our local &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new-feature&lt;/code&gt; is updated with colleagues’ pushes whenever we pull/fetch from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;remote&lt;/code&gt;.)&lt;/p&gt;
+
+&lt;p&gt;Once we’ve merged our changes with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; and we’re all done with the development branch, we can delete it.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git branch &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; new-feature
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To delete a remote branch,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin &lt;span class=&quot;nt&quot;&gt;--delete&lt;/span&gt; new-feature
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To summarize the workflow:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;start with a stable &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; branch&lt;/li&gt;
+  &lt;li&gt;make a development branch&lt;/li&gt;
+  &lt;li&gt;commit changes to it&lt;/li&gt;
+  &lt;li&gt;when the feature is complete, merge with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;optionally push the development branch&lt;/li&gt;
+  &lt;li&gt;delete the development branch&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;submitting-a-pull-request&quot;&gt;Submitting a Pull Request&lt;/h3&gt;
+
+&lt;p&gt;The preceding workflow is also the basic process for contributing to open-source projects on Github, with a few adjustments:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Start by forking the project repository. This gives you a remote copy to push to.&lt;/li&gt;
+  &lt;li&gt;Clone the repository locally &amp;amp; follow the above workflow.&lt;/li&gt;
+  &lt;li&gt;Instead of merging with local &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt;, push the development branch.&lt;/li&gt;
+  &lt;li&gt;When your work is done, navigate to your remote development branch on Github and open a “new pull request”, under the Pull requests tab. It’ll ask for a description of the feature &amp;amp; begin a conversation thread on the original repository’s page.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Of course, that’s just the beginning, so maybe don’t delete your local branch quite yet. The project owner or community may suggest additional changes to you before agreeing to merge your feature.&lt;/p&gt;
+
+&lt;h3 id=&quot;git-tagging&quot;&gt;Git Tagging&lt;/h3&gt;
+
+&lt;p&gt;In Git, we use tags to flag notable commits in a project. Use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git tag&lt;/code&gt; to check existing tags on a project. There are two different kinds of tags.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Lightweight tags&lt;/strong&gt; (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git tag TAGNAME&lt;/code&gt;) just label a specific commit. From the &lt;a href=&quot;https://git-scm.com/book/en/v2/Git-Basics-Tagging&quot;&gt;Git website&lt;/a&gt;,&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;“[They are] basically the commit checksum stored in a file — no other information is kept.”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;strong&gt;Annotated tags&lt;/strong&gt; store a bit more info. It sounds like they’re the most useful for versioning on Github. To declare a new version using a tag:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git tag &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; v1.4 &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;version 1.4&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;This adds the tag to the most recent commit (of the branch you’re working on locally). If you want to declare something a few commits ago to be a version, use:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git log &lt;span class=&quot;nt&quot;&gt;--oneline&lt;/span&gt;
+f6face4 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;HEAD -&amp;gt; main, tag: v0.0.1, origin/main&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Commit license.
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git tag &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; v1.4 f6face4
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;releasing-a-version-to-github&quot;&gt;Releasing a Version to Github&lt;/h3&gt;
+
+&lt;p&gt;To push a new release, normally we’ll push our commits to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; as well, to advertise our new release on our project’s main page:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Either way, we push our commits to the new version’s tag:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin v1.4
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;or, if you like typing the same thing every time,&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin &lt;span class=&quot;nt&quot;&gt;--tags&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;This will update any and all tags you’ve fiddled with though, including lightweight tags. To update annotated tags only, use&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin &lt;span class=&quot;nt&quot;&gt;--follow-tags&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To display your version as a release:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Go to the repository’s main page on Github.&lt;/li&gt;
+  &lt;li&gt;In the righthand panel under Releases, a text link “Create a new release” is displayed - click it!&lt;/li&gt;
+  &lt;li&gt;From the Releases page, on the righthand side, click “Draft new release”.&lt;/li&gt;
+  &lt;li&gt;Begin typing your version’s tag in the “Tag version” field, and select it from the dropdown menu. (Handily, if all your versions start with v, you can type &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;v&lt;/code&gt; and see them all!)&lt;/li&gt;
+  &lt;li&gt;Optionally enter a title &amp;amp; description for this version.&lt;/li&gt;
+  &lt;li&gt;Scroll down &amp;amp; click “Publish release”, and voilà!&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Your new version will be displayed on your repository’s main page in the righthand panel under Releases, or at the bottom of the main page, after the README. Github auto-generates &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.zip&lt;/code&gt;/&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.tar.gz&lt;/code&gt; distributions of each release version, downloadable from the releases page.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-around-in-git&quot;&gt;Getting Around in Git&lt;/h3&gt;
+
+&lt;p&gt;These commands help me observe my git “surroundings”:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git tag&lt;/code&gt; lists all the tag names on your project.
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git tag
+v0.0.1
+v0.1.0
+v0.1.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git branch -avv&lt;/code&gt; lists remote &amp;amp; local branches, and what they track.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git branch &lt;span class=&quot;nt&quot;&gt;-avv&lt;/span&gt;
+  main                    c2f592e &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;origin/main] Minor adjustments.
+&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; new-feature             c2f592e Minor adjustments.
+  remote                  c2f592e Minor adjustments.
+  remotes/origin/gh-pages 8003501 jekyll build from Action c2f592e...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git log --oneline&lt;/code&gt; lists your commits with tags &amp;amp; origin labeled.
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git log &lt;span class=&quot;nt&quot;&gt;--oneline&lt;/span&gt;
+237406c &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;HEAD -&amp;gt; main, origin/main&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Rearrange README contents.
+002cae5 Add info on releasing versions to Github.
+36e18ad &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;tag: v0.1.1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Change faulty code block &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;README.
+758c7ef &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;tag: v0.1.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Update changelog.
+2832746 Commit changelog.
+fc718b4 Commit .gitignore.
+1623d3c Commit a readme.
+f6face4 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;tag: v0.0.1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Commit license.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git describe&lt;/code&gt; shows where you are with respect to most recent tag, in the form &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;V-N-H&lt;/code&gt;, where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;V&lt;/code&gt; is the most recent version/tag name, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;N&lt;/code&gt; is the number of commits since then, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;H&lt;/code&gt; is the last commit’s hash ID. Like this:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git describe
+v0.1.1-2-g237406c
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git status&lt;/code&gt; shows which files have been changed since last commit.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git status
+On branch main
+Your branch is up to &lt;span class=&quot;nb&quot;&gt;date &lt;/span&gt;with &lt;span class=&quot;s1&quot;&gt;'origin/main'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+
+Changes to be committed:
+  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;use &lt;span class=&quot;s2&quot;&gt;&quot;git restore --staged &amp;lt;file&amp;gt;...&quot;&lt;/span&gt; to unstage&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        modified:   README.md
+
+Changes not staged &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;commit:
+  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;use &lt;span class=&quot;s2&quot;&gt;&quot;git add &amp;lt;file&amp;gt;...&quot;&lt;/span&gt; to update what will be committed&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;use &lt;span class=&quot;s2&quot;&gt;&quot;git restore &amp;lt;file&amp;gt;...&quot;&lt;/span&gt; to discard changes &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;working directory&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+        modified:   README.md
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git diff&lt;/code&gt; shows line-by-line details of those changes.&lt;/p&gt;
+
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git diff
+diff &lt;span class=&quot;nt&quot;&gt;--git&lt;/span&gt; a/README.md b/README.md
+index 190ea13..a75d153 100644
+&lt;span class=&quot;nt&quot;&gt;---&lt;/span&gt; a/README.md
++++ b/README.md
+@@ &lt;span class=&quot;nt&quot;&gt;-1&lt;/span&gt;,15 +1,15 @@
+ &lt;span class=&quot;c&quot;&gt;# Learning How Git Versioning Works&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;-Use&lt;/span&gt; &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;git tag&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt; to check existing tags on a project.
++In Git, we use tags to flag notable commits &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;a project. Use &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;git tag&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt; to check existing tags on a project. There are two different kinds of tags.
+
+&lt;span class=&quot;nt&quot;&gt;-Lightweight&lt;/span&gt; tags &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;git tag TAGNAME&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; just label a specific commit. They are
+-&amp;gt;&lt;span class=&quot;s2&quot;&gt;&quot;basically the commit checksum stored in a file — no other information is kept.&quot;&lt;/span&gt;
++Lightweight tags &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;git tag TAGNAME&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; just label a specific commit. From the &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Git website]&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;https://git-scm.com/book/en/v2/Git-Basics-Tagging&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;,
++&amp;gt;&lt;span class=&quot;s2&quot;&gt;&quot;[They are] basically the commit checksum stored in a file — no other information is kept.&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;-Annotated&lt;/span&gt; tags sound like they&lt;span class=&quot;s1&quot;&gt;'re the most useful for versioning with github.
++Annotated tags store a bit more info. It sounds like they'&lt;/span&gt;re the most useful &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;versioning with github. To &lt;span class=&quot;nb&quot;&gt;declare &lt;/span&gt;a new version using a tag, &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;:
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;odds-and-ends&quot;&gt;Odds and ends&lt;/h3&gt;
+
+&lt;p&gt;To edit the most recent commit message before pushing:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;--amend&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;However, this adds our unstaged changes to the commit as well.
+More generally, we can “tidy up” small local commits (typos, etc.) by refactoring them before pushing. To rewind the last N commits,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git reset &lt;span class=&quot;nt&quot;&gt;--soft&lt;/span&gt; HEAD~N
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After soft resetting, our commit messages are deleted but all our changes remain, unstaged. From here, we can recommit them all at once,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;or we can add files manually and re-commit them in whatever grouping makes sense to us.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add FILE1
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;FILE-SPECIFIC MESSAGE&quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add FILE2 FILE3
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;ANOTHER MESSAGE&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To move a tag to the most recent commit:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin :refs/tags/TAGNAME
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git tag &lt;span class=&quot;nt&quot;&gt;--force&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; TAGNAME
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push origin main &lt;span class=&quot;nt&quot;&gt;--tags&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One last tidbit — please be careful with this one! Unlike other Git commands, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;reset --hard&lt;/code&gt; deletes changes for good. However, if we’ve made a mess of our project files and just want to start fresh, we can.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git reset &lt;span class=&quot;nt&quot;&gt;--hard&lt;/span&gt; HEAD
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;This discards all changes since the last commit (or whichever commit &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HEAD&lt;/code&gt; is on), including changes staged for commit AND unadded changes.&lt;/p&gt;
+
+&lt;p&gt;And that’s it for now! Thanks for reading. :)&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://git-scm.com/book/en/v2/&quot;&gt;Git Basics&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/37814286/how-to-manage-the-version-number-in-git#46434732&quot;&gt;marco.marinangeli on Stack Overflow&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/179123/how-to-modify-existing-unpushed-commit-messages&quot;&gt;The Stack Overflow community wiki&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit&quot;&gt;Greg Hewgill on Stack Overflow&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.hanselman.com/blog/EasilyRenameYourGitDefaultBranchFromMasterToMain.aspx&quot;&gt;Scott Hanselman&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">Sometimes, in between projects, I lose track of all the Git tips I’ve learned. Here are some of my faves.</summary></entry><entry><title type="html">Blog-Hosting Odds &amp;amp; Ends</title><link href="/2020/09/19/bloghosting_odds_and_ends.html" rel="alternate" type="text/html" title="Blog-Hosting Odds &amp;amp; Ends" /><published>2020-09-19T23:00:00+00:00</published><updated>2020-09-19T23:00:00+00:00</updated><id>/2020/09/19/bloghosting_odds_and_ends</id><content type="html" xml:base="/2020/09/19/bloghosting_odds_and_ends.html">&lt;p&gt;Last time, I wrote a bit about my process building this blog, from project start to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;. 
+Here we’ll go over a few more steps: pagination, Formspree, and Github Pages.&lt;/p&gt;
+
+&lt;h3 id=&quot;pagination&quot;&gt;Pagination&lt;/h3&gt;
+
+&lt;p&gt;At some point, this blog will have more than two entries, and we’ll need a way to archive them. 
+A popular method is pagination, i.e. displaying entries over several numbered webpages - think Google search results.&lt;/p&gt;
+
+&lt;p&gt;Jekyll has a convenient plugin for this called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-paginate-v2&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle add jekyll-paginate-v2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To use it, we need to add it to Jekyll’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;gems&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;jekyll-paginate-v2&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;pagination&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can also customize how we want pages generated using &lt;a href=&quot;https://github.com/sverrirs/jekyll-paginate-v2/blob/master/README-GENERATOR.md&quot;&gt;these&lt;/a&gt; elements, like so:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;gems&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;jekyll-paginate-v2&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;pagination&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;per_page&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;3&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;permalink&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;/posts/page/:num/'&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;posts&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;page&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s&quot;&gt;:num'&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;limit&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;sort_field&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;date'&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;sort_reverse&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then we need to enable it in the frontmatter of the page we want paginated.
+For this blog, that’s &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;posts/index.html&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;layout&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;page&lt;/span&gt;
+&lt;span class=&quot;na&quot;&gt;pagination&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;enabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;true&lt;/span&gt;
+&lt;span class=&quot;nn&quot;&gt;---&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To render our archive pages, we inject &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pagination&lt;/code&gt;’s &lt;a href=&quot;https://github.com/Shopify/liquid&quot;&gt;Liquid&lt;/a&gt; attributes into a post preview template. 
+There are relevant instructions for it’s predecessor on the &lt;a href=&quot;https://jekyllrb.com/docs/pagination/&quot;&gt;Jekyll site&lt;/a&gt; which I used as a reference.
+Here’s their Liquid template.&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- This loops through the paginated posts --&amp;gt;&lt;/span&gt;
+{% for post in paginator.posts %}
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;h1&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ post.url }}&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ post.title }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&amp;lt;/h1&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;author&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;date&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;{{ post.date }}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;content&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    {{ post.content }}
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+{% endfor %}
+
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Pagination links --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;pagination&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  {% if paginator.previous_page %}
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ paginator.previous_page_path }}&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;previous&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      Previous
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+  {% else %}
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;previous&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Previous&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+  {% endif %}
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;page_number &quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    Page: {{ paginator.page }} of {{ paginator.total_pages }}
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+  {% if paginator.next_page %}
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;a&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;{{ paginator.next_page_path }}&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;next&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Next&lt;span class=&quot;nt&quot;&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+  {% else %}
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;span&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;next &quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Next&lt;span class=&quot;nt&quot;&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+  {% endif %}
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The important thing to notice here is that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pagination&lt;/code&gt; generates a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;paginator&lt;/code&gt; Liquid object  with all the useful info we need. 
+Namely, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;paginator.posts&lt;/code&gt; lets us iterate over our posts to generate the archive.&lt;/p&gt;
+
+&lt;p&gt;Plug this into our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;posts/index.html&lt;/code&gt; template &amp;amp; we’re good to go!
+When we &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, Jekyll prints an additional output line to indicate successful pagination.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; Incremental build: disabled. Enable with &lt;span class=&quot;nt&quot;&gt;--incremental&lt;/span&gt;
+      Generating...
+        Pagination: found page: posts/index.html
+                            ...done &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;1.320741 seconds.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can see our results at &lt;a href=&quot;localhost:4000/posts&quot;&gt;localhost:4000/posts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;formspree&quot;&gt;Formspree&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://github.com/StartBootstrap/startbootstrap-clean-blog-jekyll&quot;&gt;theme&lt;/a&gt; we’re using for this blog comes packaged with the option of a contact page. In their setup guide, they offer this template as a starting point for a contact form:&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sentMessage&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;contactForm&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;novalidate&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Name&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Name&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter your name.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Email Address&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;email&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Email Address&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;email&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter your email address.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group col-xs-12 floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Phone Number&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;tel&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Phone Number&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;phone&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter your phone number.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Message&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;textarea&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rows=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;5&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Message&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;message&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter a message.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/textarea&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;br&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;success&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;button&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;submit&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;btn btn-primary&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sendMessageButton&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;Send&lt;span class=&quot;nt&quot;&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/form&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2020-09-19-bloghosting_odds_and_ends/contact1.png&quot; class=&quot;w-100&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It looks nice but isn’t functional out of the box. For that, we want Formspree.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://formspree.io/&quot;&gt;Formspree&lt;/a&gt; is a freemium web service that tracks form submissions &amp;amp; forwards them via email.
+To use Formspree, first make an account. Then add your account’s email address to your form html with&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://formspree.io/YOUR_EMAIL&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;POST&quot;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Formspree offers this barebones contact form template (and &lt;a href=&quot;https://formspree.io/library&quot;&gt;others&lt;/a&gt;):&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://formspree.io/FORM_ID&quot;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;POST&quot;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;
+    Your Name:
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;
+    Your Email:
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;email&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_replyto&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;
+    Message:
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;textarea&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;message&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/textarea&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;submit&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Send&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/form&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/2020-09-19-bloghosting_odds_and_ends/contact2.png&quot; class=&quot;mw-100&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It looks pretty bland, but includes everything essential to function with Formspree.&lt;/p&gt;
+
+&lt;p&gt;Next, we need to validate the account. In order to do so, we need to submit our account email address into a working form. Let’s test ours out with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;On sending the form submission, we are redirected to the Formspree site and an activation email is sent to us.
+We can also check for successful submissions under the Forms tab on our Formspree account.&lt;/p&gt;
+
+&lt;p&gt;Once the form is activated, we can &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git push&lt;/code&gt; and set up our Github Pages site. 
+Formspree identifies each form object by its host address, so once our form is up on Github, we’ll have to activate it once again. 
+(This also means we can edit the HTML now without worrying about reactivation.)&lt;/p&gt;
+
+&lt;p&gt;Now let’s look back at our template’s form template and see what we’re missing.&lt;/p&gt;
+
+&lt;p&gt;First, we need to add&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;action=&quot;https://formspree.io/YOUR_EMAIL&quot;
+method=&quot;POST&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;form&amp;gt;&lt;/code&gt; element, as above.&lt;/p&gt;
+
+&lt;p&gt;We’ll also change that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;button&amp;gt;&lt;/code&gt; element into an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;input&amp;gt;&lt;/code&gt; while retaining those nice Bootstrap styles.&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;submit&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;btn btn-primary&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Send&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Next, we need to ensure the other &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;input&amp;gt;&lt;/code&gt; elements are each assigned a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt; value.
+Formspree treats &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name=_replyto&lt;/code&gt; specially by passing the input string to the “Reply To” address in the email we receive - so let’s add it to our “email” field.&lt;/p&gt;
+
+&lt;p&gt;Finally, I added some optional form fields to customize how submissions are processed.&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hidden&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_subject&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Sent from blog Contact form.&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_gotcha&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;style=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;display:none&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hidden&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_next&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The first sets the subject line in emails we receive. The second is a fake input field to help weed out bots. And the third sets where users are redirected after form submission.&lt;/p&gt;
+
+&lt;p&gt;Altogether, here’s what I ended up with:&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;container&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;row&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;col-lg-8 col-md-10 mx-auto&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;form&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;contactform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;action=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;//formspree.io/tom.on.github@gmail.com&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;method=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;POST&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;accept-charset=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;utf-8&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Name&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;name&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Name&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter your name.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Email Address&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;email&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_replyto&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Email Address&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter your email address.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;control-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group floating-label-form-group controls&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;label&amp;gt;&lt;/span&gt;Message&lt;span class=&quot;nt&quot;&gt;&amp;lt;/label&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;textarea&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;message&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-control&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;placeholder=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Message&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;required&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;data-validation-required-message=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Please enter a message.&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/textarea&amp;gt;&lt;/span&gt;
+              &lt;span class=&quot;nt&quot;&gt;&amp;lt;p&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;help-block text-danger&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hidden&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_subject&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Sent from blog Contact form.&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;text&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_gotcha&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;style=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;display:none&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;hidden&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;_next&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;br&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;success&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;form-group&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;input&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;submit&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;btn btn-primary&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;value=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Send&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/form&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;using-github-pages-with-jekyll-4&quot;&gt;Using Github Pages with Jekyll 4&lt;/h3&gt;
+
+&lt;p&gt;Github Pages is a great, free way to get your first website online. 
+Furthermore, Github Pages is integrated with Jekyll out of the box, making webhosting even easier.
+To set up a personal site:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Make a new repository on Github, called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;your_username&amp;gt;.github.io&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;After testing your site locally with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git push&lt;/code&gt; it to the new repository.&lt;/li&gt;
+  &lt;li&gt;Go to your repository settings, scroll to the Github Pages section &amp;amp; confirm which branch to publish from.&lt;/li&gt;
+  &lt;li&gt;In about 10 minutes, your website will be live at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://&amp;lt;your_username&amp;gt;.github.io&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Github takes care of building our site from the Jekyll components in our repository. 
+However, it’s only compatible with Jekyll 3.9.0. Meanwhile, Jekyll 4 has been released for over a year, and there’s a bunch of cool new gems to try out.
+How do we solve this problem?&lt;/p&gt;
+
+&lt;p&gt;The answer, until Github updates their Jekyll dependencies, is to use Github actions. 
+(Another option is to host on &lt;a href=&quot;https://www.netlify.com/blog/2020/04/02/a-step-by-step-guide-jekyll-4.0-on-netlify/&quot;&gt;Netlify&lt;/a&gt; instead.)
+Basically, actions are custom Github macros that can help with project deployment.&lt;/p&gt;
+
+&lt;p&gt;Because many people have been bumping up against this limit, Alain Hélaïli wrote &lt;a href=&quot;https://github.com/helaili/jekyll-action&quot;&gt;this action&lt;/a&gt; as a workaround.
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-action&lt;/code&gt; assembles everything itself by running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll build&lt;/code&gt;, then pushes the output &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_site&lt;/code&gt; to a new branch for hosting.
+Let’s try it out!&lt;/p&gt;
+
+&lt;p&gt;First, add the subdirectory &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.github/workflows/&lt;/code&gt; to your project. 
+This is where Github looks for actions. 
+Next, following &lt;a href=&quot;https://jekyllrb.com/docs/continuous-integration/github-actions/&quot;&gt;these instructions&lt;/a&gt;, create a &lt;a href=&quot;https://yaml.org/&quot;&gt;YAML&lt;/a&gt; file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages.yml&lt;/code&gt; containing:&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Build and deploy Jekyll site to Github Pages&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;branches&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;main&lt;/span&gt;
+
+&lt;span class=&quot;na&quot;&gt;jobs&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;github-pages&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;runs-on&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;ubuntu-16.04&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;steps&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;uses&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;actions/checkout@v2&lt;/span&gt;
+      &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;uses&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;helaili/jekyll-action@2.0.4&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;JEKYLL_PAT&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;${{ secrets.JEKYLL_PAT }}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Note: If you’re working on another branch than &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt;, substitute it for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;main&lt;/code&gt; above.
+See &lt;a href=&quot;https://github.com/helaili/jekyll-action&quot;&gt;the README&lt;/a&gt; for more options.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;For &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll-action&lt;/code&gt; to auto-push changes, it needs authentication. 
+To set up an authentication token, follow these steps from the &lt;a href=&quot;https://jekyllrb.com/docs/continuous-integration/github-actions/&quot;&gt;Jekyll site&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ol&gt;
+    &lt;li&gt;On your GitHub profile, under Developer Settings, go to the Personal Access Tokens section.&lt;/li&gt;
+    &lt;li&gt;Create a token. Give it a name like “GitHub Actions” and ensure it has permissions to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;public_repos&lt;/code&gt; (or the entire &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;repo&lt;/code&gt; scope for private repository) — necessary for the action to commit to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gh-pages&lt;/code&gt; branch.&lt;/li&gt;
+    &lt;li&gt;Copy the token value.&lt;/li&gt;
+    &lt;li&gt;Go to your repository’s Settings and then the Secrets tab.&lt;/li&gt;
+    &lt;li&gt;Create a token named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;JEKYLL_PAT&lt;/code&gt; (important). Give it a value using the value copied above.&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Make sure to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;add&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;commit&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;push&lt;/code&gt; the new file as well.&lt;/p&gt;
+
+&lt;p&gt;Once &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages.yml&lt;/code&gt; is up on Github, any further pushes will generate/update a site branch for us.
+From there, all we have to do is select this branch in our repository settings to host Github Pages, and voilà - our Jekyll 4 site is up and running on Github.&lt;/p&gt;
+
+&lt;p&gt;Github actions are a powerful development tool. 
+We really only grazed the surface here in order to get our site running. 
+If you’re curious for more, check out Sid’s take on actions &lt;a href=&quot;https://devopsdirective.com/posts/2020/07/stupid-github-actions/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">Last time, I wrote a bit about my process building this blog, from project start to jekyll serve. Here we’ll go over a few more steps: pagination, Formspree, and Github Pages.</summary></entry><entry><title type="html">Playing with Gems</title><link href="/jekyll/update/2020/09/07/playing_with_gems.html" rel="alternate" type="text/html" title="Playing with Gems" /><published>2020-09-07T06:31:00+00:00</published><updated>2020-09-07T06:31:00+00:00</updated><id>/jekyll/update/2020/09/07/playing_with_gems</id><content type="html" xml:base="/jekyll/update/2020/09/07/playing_with_gems.html">&lt;p&gt;Today, I decided to teach myself some web development skills. I’ve made basic websites in the past with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;html&lt;/code&gt; &amp;amp; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;css&lt;/code&gt;, but always bumped up against certain limits.
+Making a blog with post previews, for example, seemed like a daunting exercise in repetition &amp;amp; coordination of multiple edited files per post — or at best, an interesting but exceedingly involved exercise in scripting.
+I was familiar enough with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt; to know these type of problems must already have solutions, so it felt like time to familiarize myself with some new tools.&lt;/p&gt;
+
+&lt;p&gt;The tools we’re learning about today are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Jekyll&lt;/li&gt;
+  &lt;li&gt;Bootstrap&lt;/li&gt;
+  &lt;li&gt;rbenv&lt;/li&gt;
+  &lt;li&gt;Bundler&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;jekyll&quot;&gt;Jekyll&lt;/h2&gt;
+
+&lt;p&gt;Jekyll is a powerful tool for building websites, but to be honest, I’m still just beginning to grasp what it can do. From the &lt;a href=&quot;https://github.com/jekyll/jekyll/&quot;&gt;readme&lt;/a&gt;,&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;“Jekyll is a simple, blog-aware, static site generator perfect for personal, project, or organization sites.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;When I tackled my first &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;html&lt;/code&gt; tutorial over at &lt;a href=&quot;https://www.learnenough.com/html&quot;&gt;Learn Enough to Be Dangerous&lt;/a&gt; (back when it was free), I was taught that Jekyll offers a handy way to test out your website locally.
+After going through the rigmarole of installation, we can type up a quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;hello world&lt;/code&gt;,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'hello world'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; index.html
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and all it takes is&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll serve
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;to see your mockup in-browser at the local address &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://127.168.0.1:4000&lt;/code&gt;. The first time that worked, it felt pretty special!&lt;/p&gt;
+
+&lt;p&gt;Another handy trick &lt;a href=&quot;https://www.learnenough.com/&quot;&gt;Learn Enough&lt;/a&gt; taught was the basic use of layouts. 
+Using some simple markup, Jekyll offers us the ability to extract (say) our website header into its own &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;header.html&lt;/code&gt; file. 
+Then we can include that snippet of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;html&lt;/code&gt; at the beginning of multiple site links. 
+The snippets get assembled during &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt; (locally) or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll build&lt;/code&gt; (when publishing online) and we see the conglomerated effect of them in our browser.&lt;/p&gt;
+
+&lt;p&gt;This aspect of Jekyll really caught my interest. It felt like a piece of the “blog preview” puzzle. But I had other projects on the go at the time, so now, we’re checking it out.&lt;/p&gt;
+
+&lt;h2 id=&quot;bootstrap&quot;&gt;Bootstrap&lt;/h2&gt;
+
+&lt;p&gt;Next on my journey, I ran into Bootstrap — an entire library of standardized css classes. The initial appeal to me, was the option to focus solely on the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;html&lt;/code&gt; file, rather than continuously referring back to &amp;amp; editing my stylesheet as well.&lt;/p&gt;
+
+&lt;p&gt;However, Bootstrap does much more than that! 
+The entire library is built to be responsive to the size of your view-screen, with priority focus on the mobile user. 
+By using Bootstrap element classes, our webpages should at least be presentable on smartphones, tablets, and large desktop monitors alike, without wasting our time nitpicking around &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;em&lt;/code&gt;s and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vw&lt;/code&gt;s.
+For hobbyists like me with limited access to testing devices, this is a big plus.&lt;/p&gt;
+
+&lt;p&gt;To apply Bootstrap to your web project, include these stylesheets in your page header:&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Latest compiled and minified CSS --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;link&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rel=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;stylesheet&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- jQuery library --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Popper JS --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- Latest compiled JavaScript --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;script &lt;/span&gt;&lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://www.w3schools.com/bootstrap4/bootstrap_get_started.asp&quot;&gt;w3s tutorial&lt;/a&gt; to get a feel for some Bootstrap basics.&lt;/p&gt;
+
+&lt;p&gt;At the end of the day, Bootstrap takes care of a lot in terms of portability, but it still leaves us doing most of the legwork in terms of templating, and it sure doesn’t solve the problem of building an easily updatable blog site.&lt;/p&gt;
+
+&lt;p&gt;Happily, many users have shared their own Bootstrap-based templates &amp;amp; themes! If you really just want to get a website up and running, you can check them out &lt;a href=&quot;https://startbootstrap.com/themes/&quot;&gt;here&lt;/a&gt;. Of course, for the curious, that’s not a very satisfying ending.&lt;/p&gt;
+
+&lt;p&gt;I did find an &lt;a href=&quot;https://startbootstrap.com/themes/clean-blog-jekyll/&quot;&gt;interesting Bootstrap theme&lt;/a&gt; that incorporates Jekyll into its templating.
+Once we have a bit more understanding of how each piece works, we’ll test it out.&lt;/p&gt;
+
+&lt;h2 id=&quot;rbenv&quot;&gt;rbenv&lt;/h2&gt;
+
+&lt;p&gt;Jekyll is written in Ruby &amp;amp; distributed as a Ruby ‘gem’, aka. a portable self-contained piece of code. 
+In order to make our web-dev environment truly reproducible, we need to track which version of Ruby we’re developing with. 
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt; fills this role, in the same way that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;virtualenv&lt;/code&gt; does for a Python environment.&lt;/p&gt;
+
+&lt;p&gt;To install &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt;, we can either grab it with Homebrew on Mac (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;brew install rbenv&lt;/code&gt;) or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;git clone&lt;/code&gt; from &lt;a href=&quot;https://github.com/rbenv/rbenv&quot;&gt;source&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt; manages your Ruby versions by adding shims to your system &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$PATH&lt;/code&gt;. 
+Whenever we enter Ruby commands such as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle&lt;/code&gt;, they are intercepted &amp;amp; rerouted to the appropriate binary.&lt;/p&gt;
+
+&lt;p&gt;Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt; is simple. To set up a global default Ruby version,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rbenv global 2.7.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;(This is saved in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.rbenv/version&lt;/code&gt;.) Or, to set up a local Ruby environment,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rbenv &lt;span class=&quot;nb&quot;&gt;local &lt;/span&gt;2.7.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;which creates a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ruby-version&lt;/code&gt; file in your project home.&lt;/p&gt;
+
+&lt;h4 id=&quot;a-few-notes&quot;&gt;A few notes:&lt;/h4&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv versions&lt;/code&gt; checks which ruby versions are on your machine&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rbenv versions
+  system
+  2.3.3
+  2.7.0
+&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; 2.7.1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;by ~/playing_with_gems/.ruby-version&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  2.7.1_2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv install -l&lt;/code&gt; lists all stable ruby releases&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rbenv &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+2.5.8
+2.6.6
+2.7.1
+jruby-9.2.13.0
+maglev-1.0.0
+mruby-2.1.2
+rbx-5.0
+truffleruby-20.2.0
+truffleruby+graalvm-20.2.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;and of course, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv install VERSION&lt;/code&gt; installs a version locally.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;bundler&quot;&gt;Bundler&lt;/h2&gt;
+
+&lt;p&gt;With our Ruby environment set up, our next task is managing versions for our gems, which is where Bundler comes in.&lt;/p&gt;
+
+&lt;p&gt;Bundler tracks gem dependencies. Although &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem&lt;/code&gt; is the Ruby package manager, we will be sending all our install requests to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem&lt;/code&gt; via Bundler. 
+We will also execute any gem commands (like &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;) via Bundler using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle exec&lt;/code&gt; prefix. 
+Along with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt;, Bundler ensures a reproducible Ruby environment.&lt;/p&gt;
+
+&lt;p&gt;Install Bundler with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gem&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;bundler
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;And record gem versions with a file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt; (or let Bundler add them for you).&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;the-essentials&quot;&gt;The Essentials&lt;/h1&gt;
+
+&lt;p&gt;Say we want to set up an environment to develop a website using Jekyll, and maybe add some other gems along the way.&lt;/p&gt;
+
+&lt;h3 id=&quot;git&quot;&gt;Git&lt;/h3&gt;
+
+&lt;p&gt;First, of course, set up version control:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;rbenv-1&quot;&gt;rbenv&lt;/h3&gt;
+
+&lt;p&gt;Then, use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rbenv&lt;/code&gt; to declare which version of Ruby to use.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rbenv version 2.7.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;bundler-1&quot;&gt;Bundler&lt;/h3&gt;
+
+&lt;p&gt;Next, initialize our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle init
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Optionally, declare a directory to hold installed gems.&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle config &lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--local&lt;/span&gt; path &lt;span class=&quot;s1&quot;&gt;'vendor/bundle'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When we &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle add&lt;/code&gt; gems to our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Gemfile&lt;/code&gt;, Bundler auto-installs dependencies as well.&lt;/p&gt;
+
+&lt;h3 id=&quot;jekyll-1&quot;&gt;Jekyll&lt;/h3&gt;
+
+&lt;p&gt;To use Jekyll in our project,&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle add jekyll
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If that works, great! However, in my case I had to wrestle with a rather opaque issue. 
+One dependency of Jekyll, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http-parser.gm&lt;/code&gt;, will throw install errors via Bundler if your working directory has any &lt;em&gt;spaces&lt;/em&gt; in its address. 
+Aside from the obvious workaround, see &lt;a href=&quot;https://github.com/tmm1/http_parser.rb/issues/47&quot;&gt;here&lt;/a&gt; for other ideas.&lt;/p&gt;
+
+&lt;p&gt;Once Jekyll is added succesfully, we create a Jekyll scaffold for our site. Remember to wrap Jekyll commands within &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bundle exec&lt;/code&gt; like so:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll new &lt;span class=&quot;nt&quot;&gt;--force&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--skip-bundle&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;If, like me, you set Bundler to store gems in a local directory like ‘bundles’, rather than ‘vendor/bundle’ specifically, then there’s one more step before serving. We need to tell Jekyll &lt;strong&gt;not&lt;/strong&gt; to scan our gems for blog posts! (Jekyll interprets Markdown files such as READMEs as blog posts which can lead to formatting issues in this case.)&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;exclude: ['bundle/']&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; _config.yml
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Alright, with that, it’s time to serve!&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Notably, if you want to view your locally hosted site from other devices (e.g. a smartphone):&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve &lt;span class=&quot;nt&quot;&gt;--host&lt;/span&gt; 0.0.0.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then we can view our site at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;192.168.X.Y:4000&lt;/code&gt; for other devices (where X.Y is the host device’s local address), and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0:4000&lt;/code&gt; on the host machine.&lt;/p&gt;
+
+&lt;p&gt;(Check your local address with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ifconfig | grep 192.168&lt;/code&gt; on Mac.)&lt;/p&gt;
+
+&lt;p&gt;My fave Jekyll serve call also auto-refreshes browser tabs when we save changes to hosted files:&lt;/p&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve &lt;span class=&quot;nt&quot;&gt;--livereload&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--host&lt;/span&gt; 0.0.0.0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Super handy. :)&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="update" /><summary type="html">Today, I decided to teach myself some web development skills. I’ve made basic websites in the past with html &amp;amp; css, but always bumped up against certain limits. Making a blog with post previews, for example, seemed like a daunting exercise in repetition &amp;amp; coordination of multiple edited files per post — or at best, an interesting but exceedingly involved exercise in scripting. I was familiar enough with jekyll serve to know these type of problems must already have solutions, so it felt like time to familiarize myself with some new tools.</summary></entry></feed>

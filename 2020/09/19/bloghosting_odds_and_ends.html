@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    Blog-Hosting Odds &amp; Ends - ciraben
+    
+  </title>
+
+  <meta name="description" content="Last time, I wrote a bit about my process building this blog, from project start to jekyll serve. Here we’ll go over a few more steps: pagination, Formspree,...">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/vendor/fontawesome-free/css/all.min.css">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/2020/09/19/bloghosting_odds_and_ends.html">
+  <link rel="alternate" type="application/rss+xml" title="ciraben" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">ciraben</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/projects">Portfolio</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+<header class="masthead" style="background-image: url('/images/alley.jpg')">
+  
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Blog-Hosting Odds & Ends</h1>
+            
+            <span class="meta">Posted 
+              <a href="#">
+                
+              </a>
+              on September 19, 2020 &middot; <span class="reading-time" title="Estimated read time">
+  
+   16 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p>Last time, I wrote a bit about my process building this blog, from project start to <code class="language-plaintext highlighter-rouge">jekyll serve</code>. 
+Here we’ll go over a few more steps: pagination, Formspree, and Github Pages.</p>
+
+<h3 id="pagination">Pagination</h3>
+
+<p>At some point, this blog will have more than two entries, and we’ll need a way to archive them. 
+A popular method is pagination, i.e. displaying entries over several numbered webpages - think Google search results.</p>
+
+<p>Jekyll has a convenient plugin for this called <code class="language-plaintext highlighter-rouge">jekyll-paginate-v2</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bundle add jekyll-paginate-v2
+</code></pre></div></div>
+
+<p>To use it, we need to add it to Jekyll’s <code class="language-plaintext highlighter-rouge">_config.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gems</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">jekyll-paginate-v2</span>
+<span class="na">pagination</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<p>We can also customize how we want pages generated using <a href="https://github.com/sverrirs/jekyll-paginate-v2/blob/master/README-GENERATOR.md">these</a> elements, like so:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">gems</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">jekyll-paginate-v2</span>
+<span class="na">pagination</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">per_page</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">permalink</span><span class="pi">:</span> <span class="s1">'</span><span class="s">/posts/page/:num/'</span>
+  <span class="na">title</span><span class="pi">:</span> <span class="s1">'</span><span class="s">posts</span><span class="nv"> </span><span class="s">-</span><span class="nv"> </span><span class="s">page</span><span class="nv"> </span><span class="s">:num'</span>
+  <span class="na">limit</span><span class="pi">:</span> <span class="m">0</span>
+  <span class="na">sort_field</span><span class="pi">:</span> <span class="s1">'</span><span class="s">date'</span>
+  <span class="na">sort_reverse</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<p>Then we need to enable it in the frontmatter of the page we want paginated.
+For this blog, that’s <code class="language-plaintext highlighter-rouge">posts/index.html</code>.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">---</span>
+<span class="na">layout</span><span class="pi">:</span> <span class="s">page</span>
+<span class="na">pagination</span><span class="pi">:</span>
+  <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+<span class="nn">---</span>
+</code></pre></div></div>
+
+<p>To render our archive pages, we inject <code class="language-plaintext highlighter-rouge">pagination</code>’s <a href="https://github.com/Shopify/liquid">Liquid</a> attributes into a post preview template. 
+There are relevant instructions for it’s predecessor on the <a href="https://jekyllrb.com/docs/pagination/">Jekyll site</a> which I used as a reference.
+Here’s their Liquid template.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- This loops through the paginated posts --&gt;</span>
+{% for post in paginator.posts %}
+  <span class="nt">&lt;h1&gt;&lt;a</span> <span class="na">href=</span><span class="s">"{{ post.url }}"</span><span class="nt">&gt;</span>{{ post.title }}<span class="nt">&lt;/a&gt;&lt;/h1&gt;</span>
+  <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"author"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"date"</span><span class="nt">&gt;</span>{{ post.date }}<span class="nt">&lt;/span&gt;</span>
+  <span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"content"</span><span class="nt">&gt;</span>
+    {{ post.content }}
+  <span class="nt">&lt;/div&gt;</span>
+{% endfor %}
+
+<span class="c">&lt;!-- Pagination links --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"pagination"</span><span class="nt">&gt;</span>
+  {% if paginator.previous_page %}
+    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"{{ paginator.previous_page_path }}"</span> <span class="na">class=</span><span class="s">"previous"</span><span class="nt">&gt;</span>
+      Previous
+    <span class="nt">&lt;/a&gt;</span>
+  {% else %}
+    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"previous"</span><span class="nt">&gt;</span>Previous<span class="nt">&lt;/span&gt;</span>
+  {% endif %}
+  <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"page_number "</span><span class="nt">&gt;</span>
+    Page: {{ paginator.page }} of {{ paginator.total_pages }}
+  <span class="nt">&lt;/span&gt;</span>
+  {% if paginator.next_page %}
+    <span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"{{ paginator.next_page_path }}"</span> <span class="na">class=</span><span class="s">"next"</span><span class="nt">&gt;</span>Next<span class="nt">&lt;/a&gt;</span>
+  {% else %}
+    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"next "</span><span class="nt">&gt;</span>Next<span class="nt">&lt;/span&gt;</span>
+  {% endif %}
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>The important thing to notice here is that <code class="language-plaintext highlighter-rouge">pagination</code> generates a <code class="language-plaintext highlighter-rouge">paginator</code> Liquid object  with all the useful info we need. 
+Namely, <code class="language-plaintext highlighter-rouge">paginator.posts</code> lets us iterate over our posts to generate the archive.</p>
+
+<p>Plug this into our <code class="language-plaintext highlighter-rouge">posts/index.html</code> template &amp; we’re good to go!
+When we <code class="language-plaintext highlighter-rouge">jekyll serve</code>, Jekyll prints an additional output line to indicate successful pagination.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code> Incremental build: disabled. Enable with <span class="nt">--incremental</span>
+      Generating...
+        Pagination: found page: posts/index.html
+                            ...done <span class="k">in </span>1.320741 seconds.
+</code></pre></div></div>
+
+<p>We can see our results at <a href="localhost:4000/posts">localhost:4000/posts</a>.</p>
+
+<h3 id="formspree">Formspree</h3>
+
+<p>The <a href="https://github.com/StartBootstrap/startbootstrap-clean-blog-jekyll">theme</a> we’re using for this blog comes packaged with the option of a contact page. In their setup guide, they offer this template as a starting point for a contact form:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;form</span> <span class="na">name=</span><span class="s">"sentMessage"</span> <span class="na">id=</span><span class="s">"contactForm"</span> <span class="na">novalidate</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Name"</span> <span class="na">id=</span><span class="s">"name"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter your name."</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Email Address<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"email"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Email Address"</span> <span class="na">id=</span><span class="s">"email"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter your email address."</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group col-xs-12 floating-label-form-group controls"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Phone Number<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"tel"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Phone Number"</span> <span class="na">id=</span><span class="s">"phone"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter your phone number."</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;label&gt;</span>Message<span class="nt">&lt;/label&gt;</span>
+      <span class="nt">&lt;textarea</span> <span class="na">rows=</span><span class="s">"5"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Message"</span> <span class="na">id=</span><span class="s">"message"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter a message."</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+      <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;br&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"success"</span><span class="nt">&gt;&lt;/div&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">class=</span><span class="s">"btn btn-primary"</span> <span class="na">id=</span><span class="s">"sendMessageButton"</span><span class="nt">&gt;</span>Send<span class="nt">&lt;/button&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+<span class="nt">&lt;/form&gt;</span>
+</code></pre></div></div>
+
+<p><img src="/images/2020-09-19-bloghosting_odds_and_ends/contact1.png" class="w-100" /></p>
+
+<p>It looks nice but isn’t functional out of the box. For that, we want Formspree.</p>
+
+<p><a href="http://formspree.io/">Formspree</a> is a freemium web service that tracks form submissions &amp; forwards them via email.
+To use Formspree, first make an account. Then add your account’s email address to your form html with</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;form</span>
+  <span class="na">action=</span><span class="s">"https://formspree.io/YOUR_EMAIL"</span>
+  <span class="na">method=</span><span class="s">"POST"</span>
+<span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>Formspree offers this barebones contact form template (and <a href="https://formspree.io/library">others</a>):</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;form</span>
+  <span class="na">action=</span><span class="s">"https://formspree.io/FORM_ID"</span>
+  <span class="na">method=</span><span class="s">"POST"</span>
+<span class="nt">&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    Your Name:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"name"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    Your Email:
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"email"</span> <span class="na">name=</span><span class="s">"_replyto"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;label&gt;</span>
+    Message:
+    <span class="nt">&lt;textarea</span> <span class="na">name=</span><span class="s">"message"</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+  <span class="nt">&lt;/label&gt;</span>
+  <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Send"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;/form&gt;</span>
+</code></pre></div></div>
+
+<p><img src="/images/2020-09-19-bloghosting_odds_and_ends/contact2.png" class="mw-100" /></p>
+
+<p>It looks pretty bland, but includes everything essential to function with Formspree.</p>
+
+<p>Next, we need to validate the account. In order to do so, we need to submit our account email address into a working form. Let’s test ours out with <code class="language-plaintext highlighter-rouge">jekyll serve</code>.</p>
+
+<p>On sending the form submission, we are redirected to the Formspree site and an activation email is sent to us.
+We can also check for successful submissions under the Forms tab on our Formspree account.</p>
+
+<p>Once the form is activated, we can <code class="language-plaintext highlighter-rouge">git push</code> and set up our Github Pages site. 
+Formspree identifies each form object by its host address, so once our form is up on Github, we’ll have to activate it once again. 
+(This also means we can edit the HTML now without worrying about reactivation.)</p>
+
+<p>Now let’s look back at our template’s form template and see what we’re missing.</p>
+
+<p>First, we need to add</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>action="https://formspree.io/YOUR_EMAIL"
+method="POST"
+</code></pre></div></div>
+
+<p>to the <code class="language-plaintext highlighter-rouge">&lt;form&gt;</code> element, as above.</p>
+
+<p>We’ll also change that <code class="language-plaintext highlighter-rouge">&lt;button&gt;</code> element into an <code class="language-plaintext highlighter-rouge">&lt;input&gt;</code> while retaining those nice Bootstrap styles.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">class=</span><span class="s">"btn btn-primary"</span> <span class="na">value=</span><span class="s">"Send"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>Next, we need to ensure the other <code class="language-plaintext highlighter-rouge">&lt;input&gt;</code> elements are each assigned a <code class="language-plaintext highlighter-rouge">name</code> value.
+Formspree treats <code class="language-plaintext highlighter-rouge">name=_replyto</code> specially by passing the input string to the “Reply To” address in the email we receive - so let’s add it to our “email” field.</p>
+
+<p>Finally, I added some optional form fields to customize how submissions are processed.</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_subject"</span> <span class="na">value=</span><span class="s">"Sent from blog Contact form."</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"_gotcha"</span> <span class="na">style=</span><span class="s">"display:none"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_next"</span> <span class="na">value=</span><span class="s">"/"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>The first sets the subject line in emails we receive. The second is a fake input field to help weed out bots. And the third sets where users are redirected after form submission.</p>
+
+<p>Altogether, here’s what I ended up with:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"row"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"col-lg-8 col-md-10 mx-auto"</span><span class="nt">&gt;</span>
+
+        <span class="nt">&lt;form</span> <span class="na">id=</span><span class="s">"contactform"</span> <span class="na">action=</span><span class="s">"//formspree.io/tom.on.github@gmail.com"</span> <span class="na">method=</span><span class="s">"POST"</span> <span class="na">accept-charset=</span><span class="s">"utf-8"</span><span class="nt">&gt;</span>
+
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;label&gt;</span>Name<span class="nt">&lt;/label&gt;</span>
+              <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"name"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Name"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter your name."</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;label&gt;</span>Email Address<span class="nt">&lt;/label&gt;</span>
+              <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"email"</span> <span class="na">name=</span><span class="s">"_replyto"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Email Address"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter your email address."</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"control-group"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group floating-label-form-group controls"</span><span class="nt">&gt;</span>
+              <span class="nt">&lt;label&gt;</span>Message<span class="nt">&lt;/label&gt;</span>
+              <span class="nt">&lt;textarea</span> <span class="na">name=</span><span class="s">"message"</span> <span class="na">class=</span><span class="s">"form-control"</span> <span class="na">placeholder=</span><span class="s">"Message"</span> <span class="na">required</span> <span class="na">data-validation-required-message=</span><span class="s">"Please enter a message."</span><span class="nt">&gt;&lt;/textarea&gt;</span>
+              <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"help-block text-danger"</span><span class="nt">&gt;&lt;/p&gt;</span>
+            <span class="nt">&lt;/div&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+
+          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_subject"</span> <span class="na">value=</span><span class="s">"Sent from blog Contact form."</span> <span class="nt">/&gt;</span>
+          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"_gotcha"</span> <span class="na">style=</span><span class="s">"display:none"</span> <span class="nt">/&gt;</span>
+          <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"hidden"</span> <span class="na">name=</span><span class="s">"_next"</span> <span class="na">value=</span><span class="s">"/"</span> <span class="nt">/&gt;</span>
+
+          <span class="nt">&lt;br&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"success"</span><span class="nt">&gt;&lt;/div&gt;</span>
+          <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"form-group"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">class=</span><span class="s">"btn btn-primary"</span> <span class="na">value=</span><span class="s">"Send"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;/form&gt;</span>
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<h3 id="using-github-pages-with-jekyll-4">Using Github Pages with Jekyll 4</h3>
+
+<p>Github Pages is a great, free way to get your first website online. 
+Furthermore, Github Pages is integrated with Jekyll out of the box, making webhosting even easier.
+To set up a personal site:</p>
+
+<ol>
+  <li>Make a new repository on Github, called <code class="language-plaintext highlighter-rouge">&lt;your_username&gt;.github.io</code>.</li>
+  <li>After testing your site locally with <code class="language-plaintext highlighter-rouge">jekyll serve</code>, <code class="language-plaintext highlighter-rouge">git push</code> it to the new repository.</li>
+  <li>Go to your repository settings, scroll to the Github Pages section &amp; confirm which branch to publish from.</li>
+  <li>In about 10 minutes, your website will be live at <code class="language-plaintext highlighter-rouge">https://&lt;your_username&gt;.github.io</code>.</li>
+</ol>
+
+<p>Github takes care of building our site from the Jekyll components in our repository. 
+However, it’s only compatible with Jekyll 3.9.0. Meanwhile, Jekyll 4 has been released for over a year, and there’s a bunch of cool new gems to try out.
+How do we solve this problem?</p>
+
+<p>The answer, until Github updates their Jekyll dependencies, is to use Github actions. 
+(Another option is to host on <a href="https://www.netlify.com/blog/2020/04/02/a-step-by-step-guide-jekyll-4.0-on-netlify/">Netlify</a> instead.)
+Basically, actions are custom Github macros that can help with project deployment.</p>
+
+<p>Because many people have been bumping up against this limit, Alain Hélaïli wrote <a href="https://github.com/helaili/jekyll-action">this action</a> as a workaround.
+<code class="language-plaintext highlighter-rouge">jekyll-action</code> assembles everything itself by running <code class="language-plaintext highlighter-rouge">jekyll build</code>, then pushes the output <code class="language-plaintext highlighter-rouge">_site</code> to a new branch for hosting.
+Let’s try it out!</p>
+
+<p>First, add the subdirectory <code class="language-plaintext highlighter-rouge">.github/workflows/</code> to your project. 
+This is where Github looks for actions. 
+Next, following <a href="https://jekyllrb.com/docs/continuous-integration/github-actions/">these instructions</a>, create a <a href="https://yaml.org/">YAML</a> file called <code class="language-plaintext highlighter-rouge">github-pages.yml</code> containing:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">name</span><span class="pi">:</span> <span class="s">Build and deploy Jekyll site to Github Pages</span>
+
+<span class="na">on</span><span class="pi">:</span>
+  <span class="na">push</span><span class="pi">:</span>
+    <span class="na">branches</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">main</span>
+
+<span class="na">jobs</span><span class="pi">:</span>
+  <span class="na">github-pages</span><span class="pi">:</span>
+    <span class="na">runs-on</span><span class="pi">:</span> <span class="s">ubuntu-16.04</span>
+    <span class="na">steps</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">actions/checkout@v2</span>
+      <span class="pi">-</span> <span class="na">uses</span><span class="pi">:</span> <span class="s">helaili/jekyll-action@2.0.4</span>
+        <span class="na">env</span><span class="pi">:</span>
+          <span class="na">JEKYLL_PAT</span><span class="pi">:</span> <span class="s">${{ secrets.JEKYLL_PAT }}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note: If you’re working on another branch than <code class="language-plaintext highlighter-rouge">main</code>, substitute it for <code class="language-plaintext highlighter-rouge">main</code> above.
+See <a href="https://github.com/helaili/jekyll-action">the README</a> for more options.</p>
+</blockquote>
+
+<p>For <code class="language-plaintext highlighter-rouge">jekyll-action</code> to auto-push changes, it needs authentication. 
+To set up an authentication token, follow these steps from the <a href="https://jekyllrb.com/docs/continuous-integration/github-actions/">Jekyll site</a>:</p>
+
+<blockquote>
+  <ol>
+    <li>On your GitHub profile, under Developer Settings, go to the Personal Access Tokens section.</li>
+    <li>Create a token. Give it a name like “GitHub Actions” and ensure it has permissions to <code class="language-plaintext highlighter-rouge">public_repos</code> (or the entire <code class="language-plaintext highlighter-rouge">repo</code> scope for private repository) — necessary for the action to commit to the <code class="language-plaintext highlighter-rouge">gh-pages</code> branch.</li>
+    <li>Copy the token value.</li>
+    <li>Go to your repository’s Settings and then the Secrets tab.</li>
+    <li>Create a token named <code class="language-plaintext highlighter-rouge">JEKYLL_PAT</code> (important). Give it a value using the value copied above.</li>
+  </ol>
+</blockquote>
+
+<p>Make sure to <code class="language-plaintext highlighter-rouge">add</code>, <code class="language-plaintext highlighter-rouge">commit</code> and <code class="language-plaintext highlighter-rouge">push</code> the new file as well.</p>
+
+<p>Once <code class="language-plaintext highlighter-rouge">github-pages.yml</code> is up on Github, any further pushes will generate/update a site branch for us.
+From there, all we have to do is select this branch in our repository settings to host Github Pages, and voilà - our Jekyll 4 site is up and running on Github.</p>
+
+<p>Github actions are a powerful development tool. 
+We really only grazed the surface here in order to get our site running. 
+If you’re curious for more, check out Sid’s take on actions <a href="https://devopsdirective.com/posts/2020/07/stupid-github-actions/">here</a>.</p>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/jekyll/update/2020/09/07/playing_with_gems.html" data-toggle="tooltip" data-placement="top" title="Playing with Gems">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2020/09/28/8_git_tips_to_get_you_going.html" data-toggle="tooltip" data-placement="top" title="8 Git Tips to Get You Going">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:tom.on.github@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/ciraben">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/clean-blog.min.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>

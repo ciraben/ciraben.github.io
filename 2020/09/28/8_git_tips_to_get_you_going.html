@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>
+    8 Git Tips to Get You Going - ciraben
+    
+  </title>
+
+  <meta name="description" content="Sometimes, in between projects, I lose track of all the Git tips I’ve learned. Here are some of my faves.">
+
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="/assets/vendor/fontawesome-free/css/all.min.css">
+
+  <link rel="stylesheet" href="/assets/main.css">
+  <link rel="canonical" href="/2020/09/28/8_git_tips_to_get_you_going.html">
+  <link rel="alternate" type="application/rss+xml" title="ciraben" href="/feed.xml">
+
+</head>
+
+
+<body>
+
+  <!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="/">ciraben</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      Menu
+      <i class="fa fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/projects">Portfolio</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/posts">Posts</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Page Header -->
+
+<header class="masthead" style="background-image: url('/images/tapas.jpg')">
+  
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>8 Git Tips to Get You Going</h1>
+            
+            <span class="meta">Posted 
+              <a href="#">
+                
+              </a>
+              on September 28, 2020 &middot; <span class="reading-time" title="Estimated read time">
+  
+   14 mins  read </span>
+
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+        <p>Sometimes, in between projects, I lose track of all the Git tips I’ve learned. Here are some of my faves.</p>
+
+<h3 id="the-master-branch">The <code class="language-plaintext highlighter-rouge">master</code> branch</h3>
+
+<p>Tired of seeing <code class="language-plaintext highlighter-rouge">master</code> all over your projects? As Scott Hanselman suggests, here’s a one-time fix to change the term to <code class="language-plaintext highlighter-rouge">main</code> (or <code class="language-plaintext highlighter-rouge">latest</code>, or whatever):</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git config <span class="nt">--global</span> init.defaultBranch main
+</code></pre></div></div>
+<p>Check <a href="https://www.hanselman.com/blog/EasilyRenameYourGitDefaultBranchFromMasterToMain.aspx">his article</a> for details on amending projects in progress.</p>
+
+<h3 id="making-a-new-repository">Making a new repository</h3>
+
+<p>Here’s the standard:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git init
+<span class="nv">$ </span><span class="nb">touch</span> .gitignore
+<span class="nv">$ </span>git add <span class="nb">.</span>
+<span class="nv">$ </span>git commit
+</code></pre></div></div>
+<p>(Since I edit in vim, I’ll also add <code class="language-plaintext highlighter-rouge">*.swp</code> to <code class="language-plaintext highlighter-rouge">.gitignore</code> right off the bat.) 
+Next, make a new repository on Github, grab the generated address and:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git remote add origin ADDRESS
+<span class="nv">$ </span>git push <span class="nt">-u</span> origin main
+</code></pre></div></div>
+<p>If you’re ready to start versioning, you can.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git tag <span class="nt">-a</span> v0.1.0
+<span class="nv">$ </span>git push origin <span class="nt">--tags</span>
+</code></pre></div></div>
+<p>There’s instructions for setting up a tag as a Github release later in this post.</p>
+
+<h3 id="working-on-an-established-repository">Working on an Established Repository</h3>
+
+<p>One feature that makes Git so powerful is branching – the ability to put down our work on one feature &amp; pick up work on another without hassle.</p>
+
+<p>For example, we’re writing a new post for our nifty tech blog, and we come across a typo in an old post.
+By checking out a new Git branch, we can put our writing on hold to fix the typo &amp; push a quick update without pushing our unfinished post.
+This gets even handier when the features in question impact multiple (or overlapping!) files.
+Essentially, this is the Git feature which facilitates teamwork best, and it’s handy on your own too.
+What does this look like in practice?</p>
+
+<p>Let’s illustrate a typical workflow. Say we have a stable project established on <code class="language-plaintext highlighter-rouge">main</code> and we want to work on a new (possibly build-breaking) feature. First, check out a new branch.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout <span class="nt">-b</span> new-feature
+</code></pre></div></div>
+
+<p>We can see we’re now on the <code class="language-plaintext highlighter-rouge">new-feature</code> branch - any commits will be recorded here instead of on <code class="language-plaintext highlighter-rouge">main</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git branch
+  main
+<span class="k">*</span> new-feature
+</code></pre></div></div>
+
+<p>After making some commits and successfully testing our new feature, we can add it to our <code class="language-plaintext highlighter-rouge">main</code> project.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout main
+<span class="nv">$ </span>git merge new-feature
+</code></pre></div></div>
+
+<p>If we’re testing a new Github Pages site addition, or we’re collaborating with others, we can push <code class="language-plaintext highlighter-rouge">new-feature</code> to a new remote branch:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git checkout new-feature
+<span class="nv">$ </span>git push
+</code></pre></div></div>
+
+<p>To also set <code class="language-plaintext highlighter-rouge">new-feature</code> to track its remote counterpart,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push <span class="nt">-u</span> origin
+</code></pre></div></div>
+
+<p>(This ensures our local <code class="language-plaintext highlighter-rouge">new-feature</code> is updated with colleagues’ pushes whenever we pull/fetch from <code class="language-plaintext highlighter-rouge">remote</code>.)</p>
+
+<p>Once we’ve merged our changes with <code class="language-plaintext highlighter-rouge">main</code> and we’re all done with the development branch, we can delete it.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git branch <span class="nt">-d</span> new-feature
+</code></pre></div></div>
+
+<p>To delete a remote branch,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push origin <span class="nt">--delete</span> new-feature
+</code></pre></div></div>
+
+<p>To summarize the workflow:</p>
+<ul>
+  <li>start with a stable <code class="language-plaintext highlighter-rouge">main</code> branch</li>
+  <li>make a development branch</li>
+  <li>commit changes to it</li>
+  <li>when the feature is complete, merge with <code class="language-plaintext highlighter-rouge">main</code></li>
+  <li>optionally push the development branch</li>
+  <li>delete the development branch</li>
+</ul>
+
+<h3 id="submitting-a-pull-request">Submitting a Pull Request</h3>
+
+<p>The preceding workflow is also the basic process for contributing to open-source projects on Github, with a few adjustments:</p>
+<ul>
+  <li>Start by forking the project repository. This gives you a remote copy to push to.</li>
+  <li>Clone the repository locally &amp; follow the above workflow.</li>
+  <li>Instead of merging with local <code class="language-plaintext highlighter-rouge">main</code>, push the development branch.</li>
+  <li>When your work is done, navigate to your remote development branch on Github and open a “new pull request”, under the Pull requests tab. It’ll ask for a description of the feature &amp; begin a conversation thread on the original repository’s page.</li>
+</ul>
+
+<p>Of course, that’s just the beginning, so maybe don’t delete your local branch quite yet. The project owner or community may suggest additional changes to you before agreeing to merge your feature.</p>
+
+<h3 id="git-tagging">Git Tagging</h3>
+
+<p>In Git, we use tags to flag notable commits in a project. Use <code class="language-plaintext highlighter-rouge">git tag</code> to check existing tags on a project. There are two different kinds of tags.</p>
+
+<p><strong>Lightweight tags</strong> (<code class="language-plaintext highlighter-rouge">git tag TAGNAME</code>) just label a specific commit. From the <a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging">Git website</a>,</p>
+<blockquote>
+  <p>“[They are] basically the commit checksum stored in a file — no other information is kept.”</p>
+</blockquote>
+
+<p><strong>Annotated tags</strong> store a bit more info. It sounds like they’re the most useful for versioning on Github. To declare a new version using a tag:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git tag <span class="nt">-a</span> v1.4 <span class="nt">-m</span> <span class="s2">"version 1.4"</span>
+</code></pre></div></div>
+<p>This adds the tag to the most recent commit (of the branch you’re working on locally). If you want to declare something a few commits ago to be a version, use:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git log <span class="nt">--oneline</span>
+f6face4 <span class="o">(</span>HEAD -&gt; main, tag: v0.0.1, origin/main<span class="o">)</span> Commit license.
+<span class="nv">$ </span>git tag <span class="nt">-a</span> v1.4 f6face4
+</code></pre></div></div>
+
+<h3 id="releasing-a-version-to-github">Releasing a Version to Github</h3>
+
+<p>To push a new release, normally we’ll push our commits to <code class="language-plaintext highlighter-rouge">main</code> as well, to advertise our new release on our project’s main page:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push
+</code></pre></div></div>
+<p>Either way, we push our commits to the new version’s tag:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push origin v1.4
+</code></pre></div></div>
+<p>or, if you like typing the same thing every time,</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push origin <span class="nt">--tags</span>
+</code></pre></div></div>
+<p>This will update any and all tags you’ve fiddled with though, including lightweight tags. To update annotated tags only, use</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push origin <span class="nt">--follow-tags</span><span class="sb">`</span>
+</code></pre></div></div>
+
+<p>To display your version as a release:</p>
+<ol>
+  <li>Go to the repository’s main page on Github.</li>
+  <li>In the righthand panel under Releases, a text link “Create a new release” is displayed - click it!</li>
+  <li>From the Releases page, on the righthand side, click “Draft new release”.</li>
+  <li>Begin typing your version’s tag in the “Tag version” field, and select it from the dropdown menu. (Handily, if all your versions start with v, you can type <code class="language-plaintext highlighter-rouge">v</code> and see them all!)</li>
+  <li>Optionally enter a title &amp; description for this version.</li>
+  <li>Scroll down &amp; click “Publish release”, and voilà!</li>
+</ol>
+
+<p>Your new version will be displayed on your repository’s main page in the righthand panel under Releases, or at the bottom of the main page, after the README. Github auto-generates <code class="language-plaintext highlighter-rouge">.zip</code>/<code class="language-plaintext highlighter-rouge">.tar.gz</code> distributions of each release version, downloadable from the releases page.</p>
+
+<h3 id="getting-around-in-git">Getting Around in Git</h3>
+
+<p>These commands help me observe my git “surroundings”:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">git tag</code> lists all the tag names on your project.
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git tag
+v0.0.1
+v0.1.0
+v0.1.1
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">git branch -avv</code> lists remote &amp; local branches, and what they track.</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git branch <span class="nt">-avv</span>
+  main                    c2f592e <span class="o">[</span>origin/main] Minor adjustments.
+<span class="k">*</span> new-feature             c2f592e Minor adjustments.
+  remote                  c2f592e Minor adjustments.
+  remotes/origin/gh-pages 8003501 jekyll build from Action c2f592e...
+</code></pre></div>    </div>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">git log --oneline</code> lists your commits with tags &amp; origin labeled.
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git log <span class="nt">--oneline</span>
+237406c <span class="o">(</span>HEAD -&gt; main, origin/main<span class="o">)</span> Rearrange README contents.
+002cae5 Add info on releasing versions to Github.
+36e18ad <span class="o">(</span>tag: v0.1.1<span class="o">)</span> Change faulty code block <span class="k">in </span>README.
+758c7ef <span class="o">(</span>tag: v0.1.0<span class="o">)</span> Update changelog.
+2832746 Commit changelog.
+fc718b4 Commit .gitignore.
+1623d3c Commit a readme.
+f6face4 <span class="o">(</span>tag: v0.0.1<span class="o">)</span> Commit license.
+</code></pre></div>    </div>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">git describe</code> shows where you are with respect to most recent tag, in the form <code class="language-plaintext highlighter-rouge">V-N-H</code>, where <code class="language-plaintext highlighter-rouge">V</code> is the most recent version/tag name, <code class="language-plaintext highlighter-rouge">N</code> is the number of commits since then, and <code class="language-plaintext highlighter-rouge">H</code> is the last commit’s hash ID. Like this:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git describe
+v0.1.1-2-g237406c
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">git status</code> shows which files have been changed since last commit.</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git status
+On branch main
+Your branch is up to <span class="nb">date </span>with <span class="s1">'origin/main'</span><span class="nb">.</span>
+
+Changes to be committed:
+  <span class="o">(</span>use <span class="s2">"git restore --staged &lt;file&gt;..."</span> to unstage<span class="o">)</span>
+        modified:   README.md
+
+Changes not staged <span class="k">for </span>commit:
+  <span class="o">(</span>use <span class="s2">"git add &lt;file&gt;..."</span> to update what will be committed<span class="o">)</span>
+  <span class="o">(</span>use <span class="s2">"git restore &lt;file&gt;..."</span> to discard changes <span class="k">in </span>working directory<span class="o">)</span>
+        modified:   README.md
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">git diff</code> shows line-by-line details of those changes.</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git diff
+diff <span class="nt">--git</span> a/README.md b/README.md
+index 190ea13..a75d153 100644
+<span class="nt">---</span> a/README.md
++++ b/README.md
+@@ <span class="nt">-1</span>,15 +1,15 @@
+ <span class="c"># Learning How Git Versioning Works</span>
+
+<span class="nt">-Use</span> <span class="sb">`</span>git tag<span class="sb">`</span> to check existing tags on a project.
++In Git, we use tags to flag notable commits <span class="k">in </span>a project. Use <span class="sb">`</span>git tag<span class="sb">`</span> to check existing tags on a project. There are two different kinds of tags.
+
+<span class="nt">-Lightweight</span> tags <span class="o">(</span><span class="sb">`</span>git tag TAGNAME<span class="sb">`</span><span class="o">)</span> just label a specific commit. They are
+-&gt;<span class="s2">"basically the commit checksum stored in a file — no other information is kept."</span>
++Lightweight tags <span class="o">(</span><span class="sb">`</span>git tag TAGNAME<span class="sb">`</span><span class="o">)</span> just label a specific commit. From the <span class="o">[</span>Git website]<span class="o">(</span>https://git-scm.com/book/en/v2/Git-Basics-Tagging<span class="o">)</span>,
++&gt;<span class="s2">"[They are] basically the commit checksum stored in a file — no other information is kept."</span>
+
+<span class="nt">-Annotated</span> tags sound like they<span class="s1">'re the most useful for versioning with github.
++Annotated tags store a bit more info. It sounds like they'</span>re the most useful <span class="k">for </span>versioning with github. To <span class="nb">declare </span>a new version using a tag, <span class="k">do</span>:
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h3 id="odds-and-ends">Odds and ends</h3>
+
+<p>To edit the most recent commit message before pushing:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git commit <span class="nt">--amend</span>
+</code></pre></div></div>
+
+<p>However, this adds our unstaged changes to the commit as well.
+More generally, we can “tidy up” small local commits (typos, etc.) by refactoring them before pushing. To rewind the last N commits,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git reset <span class="nt">--soft</span> HEAD~N
+</code></pre></div></div>
+
+<p>After soft resetting, our commit messages are deleted but all our changes remain, unstaged. From here, we can recommit them all at once,</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git commit <span class="nt">-a</span>
+</code></pre></div></div>
+
+<p>or we can add files manually and re-commit them in whatever grouping makes sense to us.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git add FILE1
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"FILE-SPECIFIC MESSAGE"</span>
+<span class="nv">$ </span>git add FILE2 FILE3
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s2">"ANOTHER MESSAGE"</span>
+</code></pre></div></div>
+
+<p>To move a tag to the most recent commit:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git push origin :refs/tags/TAGNAME
+<span class="nv">$ </span>git tag <span class="nt">--force</span> <span class="nt">-a</span> TAGNAME
+<span class="nv">$ </span>git push origin main <span class="nt">--tags</span>
+</code></pre></div></div>
+
+<p>One last tidbit — please be careful with this one! Unlike other Git commands, <code class="language-plaintext highlighter-rouge">reset --hard</code> deletes changes for good. However, if we’ve made a mess of our project files and just want to start fresh, we can.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git reset <span class="nt">--hard</span> HEAD
+</code></pre></div></div>
+
+<p>This discards all changes since the last commit (or whichever commit <code class="language-plaintext highlighter-rouge">HEAD</code> is on), including changes staged for commit AND unadded changes.</p>
+
+<p>And that’s it for now! Thanks for reading. :)</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://git-scm.com/book/en/v2/">Git Basics</a></li>
+  <li><a href="https://stackoverflow.com/questions/37814286/how-to-manage-the-version-number-in-git#46434732">marco.marinangeli on Stack Overflow</a></li>
+  <li><a href="https://stackoverflow.com/questions/179123/how-to-modify-existing-unpushed-commit-messages">The Stack Overflow community wiki</a></li>
+  <li><a href="https://stackoverflow.com/questions/8044583/how-can-i-move-a-tag-on-a-git-branch-to-a-different-commit">Greg Hewgill on Stack Overflow</a></li>
+  <li><a href="https://www.hanselman.com/blog/EasilyRenameYourGitDefaultBranchFromMasterToMain.aspx">Scott Hanselman</a></li>
+</ul>
+
+
+        <hr>
+
+        <div class="clearfix">
+
+          
+          <a class="btn btn-primary float-left" href="/2020/09/19/bloghosting_odds_and_ends.html" data-toggle="tooltip" data-placement="top" title="Blog-Hosting Odds & Ends">&larr; Previous<span class="d-none d-md-inline">
+              Post</span></a>
+          
+          
+          <a class="btn btn-primary float-right" href="/2020/11/04/Exploring_Free_Webhosting.html" data-toggle="tooltip" data-placement="top" title="Exploring Free Webhosting">Next<span class="d-none d-md-inline">
+              Post</span> &rarr;</a>
+          
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+
+<hr>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        <ul class="list-inline text-center">
+          
+          <li class="list-inline-item">
+            <a href="mailto:tom.on.github@gmail.com">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="far fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          
+          
+          
+          <li class="list-inline-item">
+            <a href="https://github.com/ciraben">
+              <span class="fa-stack fa-lg">
+                <i class="fas fa-circle fa-stack-2x"></i>
+                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+        </ul>
+        <p class="copyright text-muted">Copyright &copy;  2023</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+  <script src="/assets/vendor/jquery/jquery.min.js"></script>
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/startbootstrap-clean-blog/js/clean-blog.min.js"></script>
+
+<script src="/assets/scripts.js"></script>
+
+
+
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '');
+</script>
+
+
+
+</body>
+
+</html>
